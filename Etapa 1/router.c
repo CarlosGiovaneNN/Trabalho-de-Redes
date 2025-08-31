@@ -6,6 +6,8 @@
 #include <sys/socket.h> //utilização dos sockets de conexão a rede (Linux)
 #include <arpa/inet.h>  //converter endereços de Internet (como endereços IP) entre seu formato de texto e seu formato numérico binário.
 
+#include "shell.h" //importando código da thrad do shell
+
 #define pathConfigEnlaces "../configs/enlaces.config"
 #define pathConfigRoteador "../configs/roteador.config"
 #define BUFLEN 512
@@ -14,17 +16,8 @@
 int readConfigs();
 void initNeighbors();
 
-typedef struct
-{
-    char type[1];
-    int sender;
-    int receiver;
-    char payload[140];
-    char buffer[100];
-} Package;
-
-Package inbound[10];
-Package outbound[10];
+package inbound[10];
+package outbound[10];
 int neighbors[qtyRouters];
 int routerId = -1;
 char server[50];
@@ -50,6 +43,15 @@ int main(int argc, char const *argv[])
     }
 
     readConfigs();
+
+    pthread_t thread_shell;
+    if (pthread_create(&thread_shell, NULL, &rotina_shell, NULL) != 0)
+    {
+        perror("Falha ao criar a thread do shell");
+    }
+
+    pthread_join(thread_shell, NULL);
+
     return 0;
 }
 
