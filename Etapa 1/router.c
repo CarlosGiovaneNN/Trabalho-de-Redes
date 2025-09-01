@@ -5,8 +5,13 @@
 #include <pthread.h>    //utilização threads e o mutex
 #include <sys/socket.h> //utilização dos sockets de conexão a rede (Linux)
 #include <arpa/inet.h>  //converter endereços de Internet (como endereços IP) entre seu formato de texto e seu formato numérico binário.
+#include <unistd.h>
 
-#include "shell.h" //importando código da thrad do shell
+#include "services/common.h"
+#include "services/shell.h"
+#include "services/receiver.h"
+#include "services/sender.h"
+#include "services/handler.h"
 
 #define pathConfigEnlaces "../configs/enlaces.config"
 #define pathConfigRoteador "../configs/roteador.config"
@@ -16,8 +21,8 @@
 int readConfigs();
 void initNeighbors();
 
-package inbound[10];
-package outbound[10];
+Queue inbound;
+Queue outbound;
 int neighbors[qtyRouters];
 int routerId = -1;
 char server[50];
@@ -44,12 +49,36 @@ int main(int argc, char const *argv[])
 
     readConfigs();
 
-    pthread_t thread_shell;
-    if (pthread_create(&thread_shell, NULL, &rotina_shell, NULL) != 0)
-    {
-        perror("Falha ao criar a thread do shell");
+    pthread_t thread_receiver, thread_sender, thread_handler,thread_shell;
+
+    
+    if(pthread_create(&thread_receiver, NULL, &run_receiver, NULL) != 0) {
+        printf("Falha ao criar a thread do receiver");
+        return -1;
     }
 
+    sleep(1);
+    if(pthread_create(&thread_sender, NULL, &run_sender, NULL) != 0) {
+        printf("Falha ao criar a thread do sender");
+        return -1;
+    }
+
+    sleep(1);
+    if(pthread_create(&thread_handler, NULL, &run_handler, NULL) != 0) {
+        printf("Falha ao criar a thread do handler");
+        return -1;
+    }
+
+    sleep(1);
+    if (pthread_create(&thread_shell, NULL, &run_shell, NULL) != 0)
+    {
+        printf("Falha ao criar a thread do shell");
+        return -1;
+    }
+
+    pthread_join(thread_receiver, NULL);
+    pthread_join(thread_sender, NULL);
+    pthread_join(thread_handler, NULL);
     pthread_join(thread_shell, NULL);
 
     return 0;

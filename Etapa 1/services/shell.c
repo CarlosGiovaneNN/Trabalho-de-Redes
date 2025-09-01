@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <string.h>
-#include "shell.h"
+#include "common.h"
 
-void* rotina_shell(void* arg) {
+void* run_shell(void* arg) {
     char buffer[100];
     printf("Shell iniciado. Digite 'status' ou 'sair'.\n");
 
