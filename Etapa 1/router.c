@@ -15,18 +15,18 @@
 
 #define pathConfigEnlaces "../configs/enlaces.config"
 #define pathConfigRoteador "../configs/roteador.config"
-#define BUFLEN 512
-#define qtyRouters 10
 
 int readConfigs();
 void initNeighbors();
 
-Queue inbound;
-Queue outbound;
+Queue inbound; //Fila de entrada
+Queue outbound; //Fila de saida
 int neighbors[qtyRouters];
 int routerId = -1;
 char server[50];
 int port = 0;
+pthread_t thread_receiver, thread_sender, thread_handler,thread_shell;
+Router routers[qtyRouters];
 
 int main(int argc, char const *argv[])
 {
@@ -48,9 +48,6 @@ int main(int argc, char const *argv[])
     }
 
     readConfigs();
-
-    pthread_t thread_receiver, thread_sender, thread_handler,thread_shell;
-
     
     if(pthread_create(&thread_receiver, NULL, &run_receiver, NULL) != 0) {
         printf("Falha ao criar a thread do receiver");
@@ -88,7 +85,7 @@ int readConfigs()
 {
     printf("Configurando o roteador....\n");
     FILE *arquivo;
-    int numberLine;
+    int numberLine = 1;
     char line[50];
     initNeighbors();
 
@@ -118,7 +115,7 @@ int readConfigs()
         }
         else
         {
-            fprintf(stderr, "Linha %d mal formatada ou vazia. Ignorando-a.\n", numberLine);
+            printf("Caminhos: Linha %d mal formatada ou vazia. Ignorando-a.\n", numberLine);
         }
 
         numberLine++;
@@ -134,6 +131,9 @@ int readConfigs()
         return 1;
     }
 
+    int routerindex = 0;
+    numberLine = 1;
+
     while (fgets(line, sizeof(line), arquivo) != NULL)
     {
         int router, PORT;
@@ -142,15 +142,19 @@ int readConfigs()
 
         if (qtyValues == 3)
         {
+            routers[routerindex].id = router;
+            strcpy(routers[routerindex].ip, ip);
+            routers[routerindex].port = PORT;
+            routerindex++;
             if (router == routerId)
             {
                 port = PORT;
                 strcpy(server, ip);
-            }
+            } 
         }
         else
         {
-            fprintf(stderr, "Linha %d mal formatada ou vazia. Ignorando-a.\n", numberLine);
+            printf("Roteadores: Linha %d mal formatada ou vazia. Ignorando-a.\n", numberLine);
         }
 
         numberLine++;
@@ -159,6 +163,7 @@ int readConfigs()
     fclose(arquivo);
 
     printf("Configurado com sucesso\n");
+    printf("--------------------------\n");
     return 0;
 }
 
