@@ -12,19 +12,20 @@ void* run_sender(void* arg) {
         pthread_mutex_lock(&outbound.mutex);
 
         Package packageToSend = outbound.queue[outbound.first];
-
-        sendPackageToRouter(packageToSend);
-
-        pthread_mutex_unlock(&outbound.mutex);
-        
         removeFromOutboundQueue();
 
+        pthread_mutex_unlock(&outbound.mutex);
+
         sem_post(&outbound.empty);
-        
+
+        sendPackageToRouter(packageToSend);
+        printf("Pacote enviado!\n");
+
         usleep(1000);
     }
     return NULL;
 }
+
  
 void sendPackageToRouter(Package package)
 {
@@ -62,18 +63,6 @@ void sendPackageToRouter(Package package)
     {
         die("sendto()");
     }
-        
-    //receive a reply and print it
-    //clear the buffer by filling null, it might have previously received data
-    memset(buf,'\0', BUFLEN);
-    //try to receive some data, this is a blocking call
-    if (recvfrom(s, buf, BUFLEN, 0, (struct sockaddr *) &si_other, &slen) == -1)
-    {
-        die("recvfrom()");
-    }
-        
-    puts(buf);
-    
  
     close(s);
 }

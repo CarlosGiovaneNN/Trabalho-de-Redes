@@ -11,12 +11,14 @@ void* run_handler(void* arg) {
         pthread_mutex_lock(&inbound.mutex);
 
         pthread_mutex_lock(&console_mutex);
+        
         printQueue(&inbound);
+
+        removeFromInboundQueue();
+
         pthread_mutex_unlock(&console_mutex);
 
         pthread_mutex_unlock(&inbound.mutex);
-
-        removeFromInboundQueue();
 
         sem_post(&inbound.empty);
         

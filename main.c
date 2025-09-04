@@ -32,13 +32,20 @@ int main(int argc, char const *argv[])
 
     readConfigs();
 
+    pthread_mutexattr_t attr;
+    pthread_mutexattr_init(&attr);
+    pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE_NP);
+
+    pthread_mutex_init(&outbound.mutex, &attr);
+    pthread_mutex_init(&inbound.mutex, &attr);
+
+    pthread_mutexattr_destroy(&attr);
+
     sem_init(&outbound.hasData, 0, 0);
-    sem_init(&outbound.empty, 0, QTY_ROUTERS); 
-    pthread_mutex_init(&outbound.mutex, NULL);
+    sem_init(&outbound.empty, 0, QTY_ROUTERS);
 
     sem_init(&inbound.hasData, 0, 0);
     sem_init(&inbound.empty, 0, QTY_ROUTERS);
-    pthread_mutex_init(&inbound.mutex, NULL);
     
     if(pthread_create(&thread_receiver, NULL, &run_receiver, NULL) != 0) {
         printf("Falha ao criar a thread do receiver");

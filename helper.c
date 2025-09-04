@@ -1,9 +1,8 @@
 #include "services/common.h"
 
-void addToboundQueue(Queue* queue, Package newMessage, int port, char* server) {
-
-      if (&newMessage == NULL) {
-        printf("Mensagem inválida %s: %d\n", server,port);
+void addToboundQueue(Queue* queue, Package newMessage, int port, const char* server) {
+    if (queue == NULL || queue->queue == NULL) {
+        fprintf(stderr, "Queue inválida para mensagem %s:%d\n", server, port);
         return;
     }
 
@@ -17,6 +16,7 @@ void addToboundQueue(Queue* queue, Package newMessage, int port, char* server) {
     sem_post(&queue->hasData);
 }
 
+
 void addToOutboundQueue(Package newMessage, int port, char* server) {
     addToboundQueue(&outbound, newMessage, port, server);
 }
@@ -26,10 +26,8 @@ void addToInboundQueue( Package newMessage, int port,  char* server) {
 }
 
 void removeFromQueue(Queue* queue) {
-    pthread_mutex_lock(&(queue->mutex));
     memset(&queue->queue[queue->first], 0, sizeof(Package));
     queue->first = (queue->first + 1) % QTY_ROUTERS;
-    pthread_mutex_unlock(&(queue->mutex));
 }
 
 void removeFromInboundQueue() {
@@ -43,13 +41,17 @@ void removeFromOutboundQueue() {
 void printQueue(Queue* queue) {
     printf("\n\n----------------------\n");
     printf("\nFila de %s: \n", queue == &inbound ? "entrada" : "saida");
+    printf("\n----------------------\n");
+
     for (int i = queue->first; i != queue->last; i = (i + 1) % QTY_ROUTERS) {
         Package message = queue->queue[i];
-        printf("Tipo: %s\n", message.type);
-        printf("Remetente: %s\n", message.sender);
-        printf("Destinatario: %s\n", message.receiver);
+        printf("Tipo: %d\n", message.type);
+        printf("Remetente: %d\n", message.sender);
+        printf("Destinatario: %d\n", message.receiver);
         printf("Payload: %s\n", message.payload);
+        printf("----------------------\n");
     }
+    
     printf("----------------------\n\n");
 }
 

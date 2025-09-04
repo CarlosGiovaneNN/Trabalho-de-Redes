@@ -35,11 +35,12 @@ void* run_receiver(void* arg) {
             die("recvfrom()");
         }
 
-        printf("Pacote recebido de %s:%d\n", inet_ntoa(si_other.sin_addr), ntohs(si_other.sin_port));
-        printf("Conteúdo recebido: %s\n", pkg.buffer);
+        if (recv_len < sizeof(Package)) {
+            fprintf(stderr, "Pacote incompleto recebido!\n");
+            continue;
+        }
         
-        //addToInboundQueue(*(Package*)buf, ntohs(si_other.sin_port), inet_ntoa(si_other.sin_addr));
-    
+        addToInboundQueue(pkg, ntohs(si_other.sin_port), inet_ntoa(si_other.sin_addr));
     }
  
     close(s);
