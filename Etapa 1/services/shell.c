@@ -1,14 +1,41 @@
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-
 #include "common.h"
 #include "../helper.h"
+ 
+int showMenu();
+void exitRouter();
+void printStatus();
+void sendPackage();
+void showNeighbors();
+
+void* run_shell(void* arg) {
+    printf("Shell iniciado.\n\n----------------------\n");
+
+    while(1) {
+        int buffer = showMenu();
+
+        if (buffer == 0) {
+            exitRouter();
+            break;
+
+        } else if (buffer == 3) {
+            showNeighbors();
+
+        } else if (buffer == 2) {
+            printStatus();
+
+        } else if (buffer == 1)  {
+            sendPackage();
+            
+        }
+    }
+
+    return NULL;
+}
 
 int showMenu() {
     char buffer[100];
 
-    printf("Digite: \n1 - Enviar pacote.\n2 - Exibir status. \n0 - Sair.\n");
+    printf("\nDigite: \n1 - Enviar pacote.\n2 - Exibir status. \n3 - Mostrar vizinhos.\n0 - Sair.\n\n");
     printf("router %d -> ", routerId);
     scanf("%s", buffer);
 
@@ -28,67 +55,66 @@ void printStatus() {
     printf("ID: %d\n", routerId);
     printf("IP: %s\n", server);
     printf("Porta: %d\n", port);
-    printf("--------------------------\n");
+    printf("--------------------------\n\n");
 }
 
 void sendPackage() {
     char type[100], sendTo[100], payload[100];
-    printf("Digite o tipo do pacote: \n0 - Controle\n1 - Dados\n");
+    printf("Digite o tipo do pacote: \n0 - Controle\n1 - Dados\n\n->");
     scanf("%s", type);
 
     if(!strcmp(type, "0") == 0 && !strcmp(type, "1") == 0) {
-        printf("Tipo inválido!\n");
+        printf("Tipo inválido!\n\n");
         return;
     }
 
-    printf("Para qual roteador deseja enviar o pacote: ");
+    printf("Digite o numero do roteador que deseja enviar o pacote:\n");
+    for (int i = 0; i < QTY_ROUTERS; i++) {
+        if (routers[i].id != routerId && routers[i].id != -1) {
+            printf("%d - %s:%d\n", routers[i].id, routers[i].ip, routers[i].port);
+        }
+    }
+    printf("\n->");
     scanf("%s", sendTo);
 
     int sendToId = atoi(sendTo);
 
-    if((sendToId < 0 && sendToId == routerId)) {
-        printf("Roteador inválido!\n");
+    if((sendToId < 0 || sendToId == routerId)) {
+        printf("Roteador inválido!\n\n");
         return;
     }
 
     Router sendToRouter = findRouterById(sendToId);
 
     if(sendToRouter.id == -1) {
-        printf("Roteador não encontrado!\n");
+        printf("Roteador não encontrado!\n\n");
         return;
     }
 
     printf("Digite o payload: ");
+    printf("\n->");
     scanf("%s", payload);
 
     char package[BUFLEN];
     strcpy(package, type);
-    strcat(package, routerId);
+
+
+    char sender[ROUTER_ID_SIZE];
+    sprintf(sender, "%d", routerId);
+    strcat(package, sender);
+
     strcat(package, sendTo);
     strcat(package, payload);
 
     addToOutboundQueue(package, sendToRouter.port, sendToRouter.ip);
-    printQueue();
+    printQueue(&outbound);
 }
 
-void* run_shell(void* arg) {
-    printf("Shell iniciado.\n");
-
-    while(1) {
-        int buffer = showMenu();
-
-        if (buffer == 0) {
-            exitRouter();
-            break;
-
-        } else if (buffer == 2) {
-            printStatus();
-
-        } else if (buffer == 1)  {
-            sendPackage();
-
+void showNeighbors() {
+    for (int i = 0; i < QTY_ROUTERS; i++) {
+        if (routers[i].id != routerId && routers[i].id != -1 && neighbors[i] != -1) {
+            printf("Vizinho: %d - %s:%d, custo: %d\n", routers[i].id, routers[i].ip, routers[i].port, neighbors[i]);
         }
     }
-
-    return NULL;
+    printf("\n----------------------\n");
 }

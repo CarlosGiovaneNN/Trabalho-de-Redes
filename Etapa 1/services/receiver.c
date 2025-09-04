@@ -1,21 +1,5 @@
-#include <stdio.h>
-#include <string.h>
 #include "common.h"
-#include<stdlib.h> //exit(0);
-#include<arpa/inet.h>
-#include<sys/socket.h>
-#include <unistd.h>
-
 #include "../helper.h"
-
-#define BUFLEN 512  //Max length of buffer
-
-
-void die(char *s)
-{
-    perror(s);
-    exit(1);
-}
 
 void* run_receiver(void* arg) {
     printf("Receiver iniciado.\n");
@@ -58,7 +42,7 @@ void* run_receiver(void* arg) {
             die("sendto()");
         }
 
-        printQueue();
+        printQueue(&inbound);
     }
  
     close(s);

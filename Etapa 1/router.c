@@ -1,32 +1,14 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <semaphore.h>  //utilização utilizar o semaforo
-#include <pthread.h>    //utilização threads e o mutex
-#include <sys/socket.h> //utilização dos sockets de conexão a rede (Linux)
-#include <arpa/inet.h>  //converter endereços de Internet (como endereços IP) entre seu formato de texto e seu formato numérico binário.
-#include <unistd.h>
-
 #include "services/common.h"
-#include "services/shell.h"
-#include "services/receiver.h"
-#include "services/sender.h"
-#include "services/handler.h"
-
-#define pathConfigEnlaces "../configs/enlaces.config"
-#define pathConfigRoteador "../configs/roteador.config"
-
-int readConfigs();
-void initNeighbors();
+#include "helper.h"
 
 Queue inbound; //Fila de entrada
 Queue outbound; //Fila de saida
-int neighbors[qtyRouters];
+int neighbors[QTY_ROUTERS];
 int routerId = -1;
 char server[50];
 int port = 0;
 pthread_t thread_receiver, thread_sender, thread_handler,thread_shell;
-Router routers[qtyRouters];
+Router routers[QTY_ROUTERS];
 
 int main(int argc, char const *argv[])
 {
@@ -48,6 +30,14 @@ int main(int argc, char const *argv[])
     }
 
     readConfigs();
+
+    sem_init(&outbound.full, 0, 0);
+    sem_init(&outbound.empty, 0, QTY_ROUTERS); 
+    pthread_mutex_init(&outbound.mutex, NULL);
+
+    sem_init(&inbound.full, 0, 0);
+    sem_init(&inbound.empty, 0, QTY_ROUTERS);
+    pthread_mutex_init(&inbound.mutex, NULL);
     
     if(pthread_create(&thread_receiver, NULL, &run_receiver, NULL) != 0) {
         printf("Falha ao criar a thread do receiver");
@@ -79,99 +69,4 @@ int main(int argc, char const *argv[])
     pthread_join(thread_shell, NULL);
 
     return 0;
-}
-
-int readConfigs()
-{
-    printf("Configurando o roteador....\n");
-    FILE *arquivo;
-    int numberLine = 1;
-    char line[50];
-    initNeighbors();
-
-    // iniciando a leitura do arquivo de enlaces.config
-    arquivo = fopen(pathConfigEnlaces, "r");
-    if (arquivo == NULL)
-    {
-        printf("Erro ao abrir o arquivo %s\n", pathConfigEnlaces);
-        return 1;
-    }
-
-    while (fgets(line, sizeof(line), arquivo) != NULL)
-    {
-        int router1, router2, cost;
-        int qtyValues = sscanf(line, "%d %d %d", &router1, &router2, &cost);
-
-        if (qtyValues == 3)
-        {
-            if (router1 == routerId)
-            {
-                neighbors[router2 - 1] = cost;
-            }
-            else if (router2 == routerId)
-            {
-                neighbors[router1 - 1] = cost;
-            }
-        }
-        else
-        {
-            printf("Caminhos: Linha %d mal formatada ou vazia. Ignorando-a.\n", numberLine);
-        }
-
-        numberLine++;
-    }
-
-    fclose(arquivo);
-
-    // iniciando a leitura do arquivo roteador.config
-    arquivo = fopen(pathConfigRoteador, "r");
-    if (arquivo == NULL)
-    {
-        printf("Erro ao abrir o arquivo %s\n", pathConfigRoteador);
-        return 1;
-    }
-
-    int routerindex = 0;
-    numberLine = 1;
-
-    while (fgets(line, sizeof(line), arquivo) != NULL)
-    {
-        int router, PORT;
-        char ip[20];
-        int qtyValues = sscanf(line, "%d %d %19s", &router, &PORT, ip);
-
-        if (qtyValues == 3)
-        {
-            routers[routerindex].id = router;
-            strcpy(routers[routerindex].ip, ip);
-            routers[routerindex].port = PORT;
-            routerindex++;
-            if (router == routerId)
-            {
-                port = PORT;
-                strcpy(server, ip);
-            } 
-        }
-        else
-        {
-            printf("Roteadores: Linha %d mal formatada ou vazia. Ignorando-a.\n", numberLine);
-        }
-
-        numberLine++;
-    }
-
-    fclose(arquivo);
-
-    printf("Configurado com sucesso\n");
-    printf("--------------------------\n");
-    return 0;
-}
-
-void initNeighbors()
-{
-    for (int i = 0; i < qtyRouters; i++)
-    {
-        neighbors[i] = -1;
-    }
-    neighbors[routerId - 1] = 0;
 }

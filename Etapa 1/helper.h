@@ -7,7 +7,11 @@ void addToOutboundQueue(char* buffer, int port, char* server);
 void removeFromInboundQueue();
 void removeFromOutboundQueue();
 
-void printQueue();
+void printQueue(Queue* queue);
+
+void readConfigs();
+
+void die(const char *s);
 
 Router findRouterById(int id);
 
