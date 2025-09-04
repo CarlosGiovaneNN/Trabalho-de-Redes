@@ -101,23 +101,12 @@ void sendPackage() {
     printf("\n->");
     scanf("%s", payload);
 
-    char package[BUFLEN];
-    strcpy(package, type);
+    Package package;
 
-    char senderStr[ROUTER_ID_SIZE + 1];
-    sprintf(senderStr, "%0*d", ROUTER_ID_SIZE, routerId);
-
-
-    strcat(package, senderStr);
-
-    char sendToStr[ROUTER_ID_SIZE + 1];
-    sprintf(sendToStr, "%0*d", ROUTER_ID_SIZE, atoi(sendTo));
-
-    strcat(package, sendToStr);
-
-    strcat(package, payload);
-
-    //printf(" %s\n", package);
+    package.type = atoi(type);
+    package.sender = routerId;
+    package.receiver = sendToId;
+    strcpy(package.payload, payload);
 
     addToOutboundQueue(package, sendToRouter.port, sendToRouter.ip);
 

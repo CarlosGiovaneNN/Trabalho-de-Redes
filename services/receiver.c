@@ -7,8 +7,9 @@ void* run_receiver(void* arg) {
     struct sockaddr_in si_me, si_other;
      
     int s, i, slen = sizeof(si_other) , recv_len;
-    char buf[BUFLEN];
-     
+    
+    Package pkg;
+
     if ((s=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1)
     {
         die("socket");
@@ -28,19 +29,17 @@ void* run_receiver(void* arg) {
     while(1)
     {
         fflush(stdout);
-        memset(buf,'\0', BUFLEN);
 
-        if ((recv_len = recvfrom(s, buf, BUFLEN, 0, (struct sockaddr *) &si_other, &slen)) == -1)
+        if ((recv_len = recvfrom(s, &pkg, sizeof(pkg), 0, (struct sockaddr *) &si_other, &slen)) == -1)
         {
             die("recvfrom()");
         }
 
-        addToInboundQueue(buf, ntohs(si_other.sin_port), inet_ntoa(si_other.sin_addr));
-         
-        if (sendto(s, buf, recv_len, 0, (struct sockaddr*) &si_other, slen) == -1)
-        {
-            die("sendto()");
-        }
+        printf("Pacote recebido de %s:%d\n", inet_ntoa(si_other.sin_addr), ntohs(si_other.sin_port));
+        printf("Conteúdo recebido: %s\n", pkg.buffer);
+        
+        //addToInboundQueue(*(Package*)buf, ntohs(si_other.sin_port), inet_ntoa(si_other.sin_addr));
+    
     }
  
     close(s);

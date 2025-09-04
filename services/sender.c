@@ -13,13 +13,13 @@ void* run_sender(void* arg) {
 
         Package packageToSend = outbound.queue[outbound.first];
 
+        sendPackageToRouter(packageToSend);
+
         pthread_mutex_unlock(&outbound.mutex);
         
         removeFromOutboundQueue();
 
         sem_post(&outbound.empty);
-
-        sendPackageToRouter(packageToSend);
         
         usleep(1000);
     }
@@ -34,26 +34,7 @@ void sendPackageToRouter(Package package)
     char buf[BUFLEN];
     char message[BUFLEN];
 
-    //create the message
-    strcpy(message, package.type);
-
-    char senderStr[ROUTER_ID_SIZE + 1];
-    sprintf(senderStr, "%0*d", ROUTER_ID_SIZE, package.sender);
-    printf("Sender: %s\n", senderStr);
-
-    strcat(message, senderStr);
-
-    char receiverStr[ROUTER_ID_SIZE + 1];
-    sprintf(receiverStr, "%0*d", ROUTER_ID_SIZE, package.receiver);
-    printf("Receiver: %s\n", receiverStr);
-
-    strcat(message, package.receiver);
-    
-    strcat(message, package.payload);
-
-    Router router = findRouterById(atoi(package.receiver));
-    //printf("%d %s %d\n", router.id, router.ip, router.port);
-    printf("%s", message);
+    Router router = findRouterById(package.receiver);
 
     if(router.id == -1) {
         printf("Roteador não encontrado!\n\n");
@@ -77,7 +58,7 @@ void sendPackageToRouter(Package package)
     }
      
     //send the message
-    if (sendto(s, message, strlen(message) , 0 , (struct sockaddr *) &si_other, slen)==-1)
+    if (sendto(s, &package, sizeof(package) , 0 , (struct sockaddr *) &si_other, slen)==-1)
     {
         die("sendto()");
     }

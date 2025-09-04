@@ -1,35 +1,11 @@
 #include "services/common.h"
 
-void addToboundQueue(Queue* queue, char* buffer, int port, char* server) {
+void addToboundQueue(Queue* queue, Package newMessage, int port, char* server) {
 
-      if (strlen(buffer) < (1 + 2 * ROUTER_ID_SIZE)) {
+      if (&newMessage == NULL) {
         printf("Mensagem inválida %s: %d\n", server,port);
         return;
     }
-
-    Package newMessage;
-
-    printf( "Mensagem recebida %s: %d\n", server, port);
-    printf("%s\n", buffer);
-
-    strncpy(newMessage.type, &buffer[0], 1);
-    newMessage.type[1] = '\0';
-    printf("Tipo: %s\n", newMessage.type);
-
-    strncpy(newMessage.sender, &buffer[1], ROUTER_ID_SIZE );
-    newMessage.sender[ROUTER_ID_SIZE] = '\0';
-    printf("Remetente: %s\n", newMessage.sender);
-
-    strncpy(newMessage.receiver, &buffer[ROUTER_ID_SIZE + 1], ROUTER_ID_SIZE) ;
-    newMessage.receiver[ROUTER_ID_SIZE] = '\0';
-    printf("Destinatario: %s\n", newMessage.receiver);
-
-    strncpy(newMessage.payload, &buffer[2 * ROUTER_ID_SIZE + 1], sizeof(newMessage.payload) - 1);
-    newMessage.payload[sizeof(newMessage.payload) - 1] = '\0';
-    printf("Payload: %s\n", newMessage.payload);
-
-    // Deixa o espaco de buffer vazio
-    memset(newMessage.buffer, 0, sizeof(newMessage.buffer));
 
     sem_wait(&queue->empty);
 
@@ -41,12 +17,12 @@ void addToboundQueue(Queue* queue, char* buffer, int port, char* server) {
     sem_post(&queue->hasData);
 }
 
-void addToOutboundQueue(char* buffer, int port, char* server) {
-    addToboundQueue(&outbound, buffer, port, server);
+void addToOutboundQueue(Package newMessage, int port, char* server) {
+    addToboundQueue(&outbound, newMessage, port, server);
 }
 
-void addToInboundQueue( char* buffer, int port,  char* server) {
-    addToboundQueue(&inbound, buffer, port, server);
+void addToInboundQueue( Package newMessage, int port,  char* server) {
+    addToboundQueue(&inbound, newMessage, port, server);
 }
 
 void removeFromQueue(Queue* queue) {

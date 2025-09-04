@@ -16,16 +16,15 @@
 #include "handler.h"
 
 #define QTY_ROUTERS 10
-#define ROUTER_ID_SIZE 2
-#define BUFLEN 512
+#define BUFLEN sizeof(Package)
 
 #define pathConfigEnlaces "configs/enlaces.config"
 #define pathConfigRoteador "configs/roteador.config"
 
 typedef struct {
-    char type[2];       // 0 - controle / 1 - dados
-    char sender[ROUTER_ID_SIZE + 1]; 
-    char receiver[ROUTER_ID_SIZE + 1];
+    int type;       // 0 - controle / 1 - dados
+    int sender; 
+    int receiver;
     char payload[140];  // Dados
     char buffer[100];   // Espaço livre
 } Package;
