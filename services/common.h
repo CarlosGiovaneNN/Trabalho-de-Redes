@@ -16,11 +16,11 @@
 #include "handler.h"
 
 #define QTY_ROUTERS 10
-#define ROUTER_ID_SIZE 1
+#define ROUTER_ID_SIZE 2
 #define BUFLEN 512
 
-#define pathConfigEnlaces "../configs/enlaces.config"
-#define pathConfigRoteador "../configs/roteador.config"
+#define pathConfigEnlaces "configs/enlaces.config"
+#define pathConfigRoteador "configs/roteador.config"
 
 typedef struct {
     char type[2];       // 0 - controle / 1 - dados
@@ -35,12 +35,12 @@ typedef struct {
     int first;
     int last; 
     pthread_mutex_t mutex;
-    sem_t full;
+    sem_t hasData;
     sem_t empty;
 } Queue;
 
 typedef struct {
-    int id;
+    char id;
     char ip[50];
     int port;
 } Router;
@@ -53,5 +53,6 @@ extern char server[50];
 extern int port;
 extern pthread_t thread_receiver, thread_sender, thread_handler,thread_shell;
 extern Router routers[QTY_ROUTERS];
+extern pthread_mutex_t console_mutex;
 
 #endif

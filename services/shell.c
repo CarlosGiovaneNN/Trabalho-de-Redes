@@ -13,8 +13,11 @@ void* run_shell(void* arg) {
     while(1) {
         int buffer = showMenu();
 
+        pthread_mutex_lock(&console_mutex);
+
         if (buffer == 0) {
             exitRouter();
+            pthread_mutex_unlock(&console_mutex);
             break;
 
         } else if (buffer == 3) {
@@ -25,8 +28,11 @@ void* run_shell(void* arg) {
 
         } else if (buffer == 1)  {
             sendPackage();
-            
+
         }
+
+        pthread_mutex_unlock(&console_mutex);
+        usleep(1000);
     }
 
     return NULL;
@@ -98,16 +104,24 @@ void sendPackage() {
     char package[BUFLEN];
     strcpy(package, type);
 
+    char senderStr[ROUTER_ID_SIZE + 1];
+    sprintf(senderStr, "%0*d", ROUTER_ID_SIZE, routerId);
 
-    char sender[ROUTER_ID_SIZE];
-    sprintf(sender, "%d", routerId);
-    strcat(package, sender);
 
-    strcat(package, sendTo);
+    strcat(package, senderStr);
+
+    char sendToStr[ROUTER_ID_SIZE + 1];
+    sprintf(sendToStr, "%0*d", ROUTER_ID_SIZE, atoi(sendTo));
+
+    strcat(package, sendToStr);
+
     strcat(package, payload);
 
+    //printf(" %s\n", package);
+
     addToOutboundQueue(package, sendToRouter.port, sendToRouter.ip);
-    printQueue(&outbound);
+
+    usleep(1000);
 }
 
 void showNeighbors() {

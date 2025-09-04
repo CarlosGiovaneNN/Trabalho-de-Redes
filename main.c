@@ -9,6 +9,7 @@ char server[50];
 int port = 0;
 pthread_t thread_receiver, thread_sender, thread_handler,thread_shell;
 Router routers[QTY_ROUTERS];
+pthread_mutex_t console_mutex;
 
 int main(int argc, char const *argv[])
 {
@@ -31,11 +32,11 @@ int main(int argc, char const *argv[])
 
     readConfigs();
 
-    sem_init(&outbound.full, 0, 0);
+    sem_init(&outbound.hasData, 0, 0);
     sem_init(&outbound.empty, 0, QTY_ROUTERS); 
     pthread_mutex_init(&outbound.mutex, NULL);
 
-    sem_init(&inbound.full, 0, 0);
+    sem_init(&inbound.hasData, 0, 0);
     sem_init(&inbound.empty, 0, QTY_ROUTERS);
     pthread_mutex_init(&inbound.mutex, NULL);
     
@@ -44,19 +45,19 @@ int main(int argc, char const *argv[])
         return -1;
     }
 
-    sleep(1);
+    usleep(1000);
     if(pthread_create(&thread_sender, NULL, &run_sender, NULL) != 0) {
         printf("Falha ao criar a thread do sender");
         return -1;
     }
 
-    sleep(1);
+    usleep(1000);
     if(pthread_create(&thread_handler, NULL, &run_handler, NULL) != 0) {
         printf("Falha ao criar a thread do handler");
         return -1;
     }
 
-    sleep(1);
+    usleep(1000);
     if (pthread_create(&thread_shell, NULL, &run_shell, NULL) != 0)
     {
         printf("Falha ao criar a thread do shell");

@@ -9,17 +9,24 @@ void addToboundQueue(Queue* queue, char* buffer, int port, char* server) {
 
     Package newMessage;
 
+    printf( "Mensagem recebida %s: %d\n", server, port);
+    printf("%s\n", buffer);
+
     strncpy(newMessage.type, &buffer[0], 1);
     newMessage.type[1] = '\0';
+    printf("Tipo: %s\n", newMessage.type);
 
     strncpy(newMessage.sender, &buffer[1], ROUTER_ID_SIZE );
     newMessage.sender[ROUTER_ID_SIZE] = '\0';
+    printf("Remetente: %s\n", newMessage.sender);
 
     strncpy(newMessage.receiver, &buffer[ROUTER_ID_SIZE + 1], ROUTER_ID_SIZE) ;
     newMessage.receiver[ROUTER_ID_SIZE] = '\0';
-    
+    printf("Destinatario: %s\n", newMessage.receiver);
+
     strncpy(newMessage.payload, &buffer[2 * ROUTER_ID_SIZE + 1], sizeof(newMessage.payload) - 1);
     newMessage.payload[sizeof(newMessage.payload) - 1] = '\0';
+    printf("Payload: %s\n", newMessage.payload);
 
     // Deixa o espaco de buffer vazio
     memset(newMessage.buffer, 0, sizeof(newMessage.buffer));
@@ -31,7 +38,7 @@ void addToboundQueue(Queue* queue, char* buffer, int port, char* server) {
     queue->last = (queue->last + 1) % QTY_ROUTERS;
     pthread_mutex_unlock(&(queue->mutex));
 
-    sem_post(&queue->full);
+    sem_post(&queue->hasData);
 }
 
 void addToOutboundQueue(char* buffer, int port, char* server) {
@@ -58,7 +65,7 @@ void removeFromOutboundQueue() {
 }
 
 void printQueue(Queue* queue) {
-    printf("----------------------\n");
+    printf("\n\n----------------------\n");
     printf("\nFila de %s: \n", queue == &inbound ? "entrada" : "saida");
     for (int i = queue->first; i != queue->last; i = (i + 1) % QTY_ROUTERS) {
         Package message = queue->queue[i];
@@ -67,7 +74,7 @@ void printQueue(Queue* queue) {
         printf("Destinatario: %s\n", message.receiver);
         printf("Payload: %s\n", message.payload);
     }
-    printf("----------------------\n");
+    printf("----------------------\n\n");
 }
 
 Router findRouterById(int id) {
@@ -127,11 +134,11 @@ int readConfigs()
         {
             if (router1 == routerId)
             {
-                neighbors[router2 - 1] = cost;
+                neighbors[router2] = cost;
             }
             else if (router2 == routerId)
             {
-                neighbors[router1 - 1] = cost;
+                neighbors[router1] = cost;
             }
         }
         else

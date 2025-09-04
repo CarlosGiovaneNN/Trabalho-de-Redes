@@ -41,8 +41,6 @@ void* run_receiver(void* arg) {
         {
             die("sendto()");
         }
-
-        printQueue(&inbound);
     }
  
     close(s);
