@@ -118,11 +118,11 @@ int readConfigs()
         {
             if (router1 == routerId)
             {
-                neighbors[router2] = cost;
+                neighbors[router2 - 1] = cost;
             }
             else if (router2 == routerId)
             {
-                neighbors[router1] = cost;
+                neighbors[router1 - 1] = cost;
             }
         }
         else
