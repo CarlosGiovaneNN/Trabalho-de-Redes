@@ -4,7 +4,7 @@
 void* run_handler(void* arg) {
     printf("Handler iniciado.\n");
 
-    
+    //aq seria so o print da filo de entrada e a remocao da primeira mensagem
     while(1) {
         sem_wait(&inbound.hasData);
 

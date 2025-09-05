@@ -30,8 +30,10 @@ int main(int argc, char const *argv[])
         }
     }
 
+    // Configurando o roteador e seus vizinhos
     readConfigs();
 
+    // GPT me falou que tem que ser assim um mutex recursivo
     pthread_mutexattr_t attr;
     pthread_mutexattr_init(&attr);
     pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE_NP);
@@ -41,12 +43,14 @@ int main(int argc, char const *argv[])
 
     pthread_mutexattr_destroy(&attr);
 
+    // inicia semaforos
     sem_init(&outbound.hasData, 0, 0);
     sem_init(&outbound.empty, 0, QTY_ROUTERS);
 
     sem_init(&inbound.hasData, 0, 0);
     sem_init(&inbound.empty, 0, QTY_ROUTERS);
     
+    // cria as threads
     if(pthread_create(&thread_receiver, NULL, &run_receiver, NULL) != 0) {
         printf("Falha ao criar a thread do receiver");
         return -1;
@@ -71,6 +75,7 @@ int main(int argc, char const *argv[])
         return -1;
     }
 
+    // aguarda as threads
     pthread_join(thread_receiver, NULL);
     pthread_join(thread_sender, NULL);
     pthread_join(thread_handler, NULL);

@@ -6,11 +6,13 @@ void sendPackageToRouter(Package package);
 void* run_sender(void* arg) {
     printf("Sender iniciado.\n");
 
-    while(1) {
+    while(1) { 
+        // aq fica esperando a fila de saida ter um item
         sem_wait(&outbound.hasData);
 
         pthread_mutex_lock(&outbound.mutex);
 
+        // remove o pacote da fila
         Package packageToSend = outbound.queue[outbound.first];
         removeFromOutboundQueue();
 
@@ -18,6 +20,7 @@ void* run_sender(void* arg) {
 
         sem_post(&outbound.empty);
 
+        // envia o pacote
         sendPackageToRouter(packageToSend);
         printf("Pacote enviado!\n");
 
@@ -30,6 +33,8 @@ void* run_sender(void* arg) {
 void sendPackageToRouter(Package package)
 {
     printf("Enviando pacote...\n");
+
+    // configuracoes do socket
     struct sockaddr_in si_other;
     int s, i, slen = sizeof(si_other);
     char buf[BUFLEN];
@@ -58,7 +63,7 @@ void sendPackageToRouter(Package package)
         exit(1);
     }
      
-    //send the message
+    // envia o pacote
     if (sendto(s, &package, sizeof(package) , 0 , (struct sockaddr *) &si_other, slen)==-1)
     {
         die("sendto()");

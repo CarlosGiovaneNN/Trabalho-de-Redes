@@ -4,6 +4,7 @@
 void* run_receiver(void* arg) {
     printf("Receiver iniciado.\n");
 
+    // configuracoes do socket
     struct sockaddr_in si_me, si_other;
      
     int s, i, slen = sizeof(si_other) , recv_len;
@@ -16,7 +17,7 @@ void* run_receiver(void* arg) {
     }
      
     memset((char *) &si_me, 0, sizeof(si_me));
-     
+    
     si_me.sin_family = AF_INET;
     si_me.sin_port = htons(port);
     si_me.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -30,6 +31,7 @@ void* run_receiver(void* arg) {
     {
         fflush(stdout);
 
+        // recebe o pacote
         if ((recv_len = recvfrom(s, &pkg, sizeof(pkg), 0, (struct sockaddr *) &si_other, &slen)) == -1)
         {
             die("recvfrom()");
@@ -40,6 +42,7 @@ void* run_receiver(void* arg) {
             continue;
         }
         
+        // adiciona o pacote na fila
         addToInboundQueue(pkg, ntohs(si_other.sin_port), inet_ntoa(si_other.sin_addr));
     }
  

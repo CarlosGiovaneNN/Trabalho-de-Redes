@@ -1,5 +1,6 @@
 #include "services/common.h"
 
+// funcao generica de adicionar mensagem a uma fila
 void addToboundQueue(Queue* queue, Package newMessage, int port, const char* server) {
     if (queue == NULL || queue->queue == NULL) {
         fprintf(stderr, "Queue inválida para mensagem %s:%d\n", server, port);
@@ -25,6 +26,7 @@ void addToInboundQueue( Package newMessage, int port,  char* server) {
     addToboundQueue(&inbound, newMessage, port, server);
 }
 
+// funcao generica de remover mensagem de uma fila
 void removeFromQueue(Queue* queue) {
     memset(&queue->queue[queue->first], 0, sizeof(Package));
     queue->first = (queue->first + 1) % QTY_ROUTERS;
@@ -38,6 +40,7 @@ void removeFromOutboundQueue() {
     removeFromQueue(&outbound);
 }
 
+// funcao generica de imprimir uma fila
 void printQueue(Queue* queue) {
     printf("\n\n----------------------\n");
     printf("\nFila de %s: \n", queue == &inbound ? "entrada" : "saida");
@@ -55,6 +58,7 @@ void printQueue(Queue* queue) {
     printf("----------------------\n\n");
 }
 
+// funcao de encontrar um roteador pelo id, caso n encontre retorna um roteador com id -1
 Router findRouterById(int id) {
     for (int i = 0; i < QTY_ROUTERS; i++) {
         if (routers[i].id == id) {
@@ -68,7 +72,7 @@ Router findRouterById(int id) {
     return notFound;
 }
 
-
+// funcao de inicializacao dos vizinhos
 void initNeighbors()
 {
     for (int i = 0; i < QTY_ROUTERS; i++)
@@ -78,6 +82,7 @@ void initNeighbors()
     neighbors[routerId - 1] = 0;
 }
 
+// funcao de limpar os roteadores
 void clearRouters()
 {
     for (int i = 0; i < QTY_ROUTERS; i++)
@@ -86,6 +91,7 @@ void clearRouters()
     }
 }
 
+// funcao de leitura dos arquivos de configuracao
 int readConfigs()
 {
     printf("Configurando o roteador....\n");
@@ -173,6 +179,7 @@ int readConfigs()
     return 0;
 }
 
+// funcao de tratamento de erros
 void die(const char *s) {
     perror(s);
     exit(1);
