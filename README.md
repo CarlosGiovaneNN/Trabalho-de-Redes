@@ -3,7 +3,7 @@
 **Curso:** Ciência da Computação  
 **Disciplina:** Redes de Computadores
 
-## 📌 Descrição Geral  
+## Descrição Geral  
 Este trabalho tem como objetivo praticar **programação com sockets** e a **simulação de um protocolo de roteamento** em redes.  
 Cada processo representará um roteador (nó da rede), que troca pacotes de roteamento via **sockets UDP**.  
 
@@ -14,40 +14,34 @@ Na versão final, os nós executarão o **algoritmo Bellman-Ford distribuído** 
 - Plataforma **Linux**  
 - Uso exclusivo de **sockets UDP**  
 - Cada nó deve executar como um **processo multithread**  
-- A submissão deve conter **todos os arquivos necessários** para compilação e execução, incluindo um **README**  
 
-### Modalidade
-- Individual ou em dupla  
-
----
-
-## ⚙️ Funcionalidades
+## Funcionalidades
 - Simulação de roteadores que se comunicam entre si via **UDP**.  
 - Configuração de rede através dos arquivos:
   - `roteador.config` (IP, porta e ID do roteador)  
-  - `enlaces.config` (custos dos enlaces entre roteadores)  
+  - `enlaces.config` (IDRoteador, IDRoteadorVizinho, custo)  
 - Roteadores trocam informações periodicamente até a convergência da tabela de rotas.  
-- Roteadores podem ser **ligados/desligados** dinamicamente.  
-- Detecção do problema de **contagem ao infinito** (limitada por um valor máximo).  
+<!-- - Roteadores podem ser **ligados/desligados** dinamicamente.  
+- Detecção do problema de **contagem ao infinito** (limitada por um valor máximo).   -->
 - Cada atualização deve imprimir no console a **tabela de roteamento com timestamp**.  
-- **Envio de mensagens de até 100 caracteres** entre quaisquer roteadores, roteadas conforme o algoritmo de Bellman-Ford.  
+- **Envio de mensagens de até 140 caracteres** entre quaisquer roteadores, roteadas conforme o algoritmo de Bellman-Ford.  
 
 ---
 
-## 🏗️ Estrutura do Projeto
+## Estrutura do Projeto
 
-### Threads mínimas
-- **receiver:** recebe mensagens dos roteadores vizinhos.  
-- **sender:** envia mensagens para vizinhos.  
-- **packet_handler:** processa mensagens (controle via Bellman-Ford ou dados).  
-- **terminal:** interface com o usuário (menu de operações).  
+### Threads
+- **receiver:** recebe mensagens dos roteadores vizinhos, e aloca-os na fila de entrada (inbound).  
+- **sender:** pega os pacotes prontos da fila de sáida (outbound) e envia para os vizinhos.  
+- **handler:** processa mensagens (controle via Bellman-Ford ou dados).  
+- **shell:** interface com o usuário (menu de operações).  
 
 ### Estruturas de dados
 - **Mensagens de controle e dados:** tipo, origem, destino, payload.  
-- **Filas de entrada e saída** (uso de mutex para sincronização).  
+- **Filas de entrada e saída** (uso de mutex para sincronização) e semáfotros para evitar espera ociosa.  
 - **Tabela de roteamento** baseada em vetores distância.  
 
----
+<!-- ---
 
 ## 📑 Etapas do Projeto  
 
@@ -66,7 +60,7 @@ Na versão final, os nós executarão o **algoritmo Bellman-Ford distribuído** 
 - Atualização automática da tabela de rotas.  
 - Encaminhamento de mensagens de dados entre quaisquer roteadores.  
 
-### Apresentação final – **13 e 14/11/2025**
+### Apresentação final – **13 e 14/11/2025** -->
 
 ---
 
@@ -100,16 +94,39 @@ Exemplo:
 
 ---
 
-## 📜 Instruções de Submissão
-- A cada etapa, entregar um **.zip** contendo:  
-  - Código-fonte comentado  
-  - Arquivos de configuração  
-  - README com instruções de compilação e uso  
+## Como Usar
 
----
+1.  **Clone o repositório:**
 
-## 💡 Dicas
-- Teste com diferentes cenários de topologia.  
-- Ative/desative roteadores e observe as mudanças.  
-- Compare os resultados no programa com simulações feitas no papel.  
-- Não deixe para a última hora.  
+    ```bash
+    git clone https://github.com/CarlosGiovaneNN/Trabalho-de-Redes.git
+    ```
+
+2.  **Navegue até o diretório do projeto:**
+
+    ```bash
+    cd Trabalho-de-Redes
+    ````
+
+3.  **Inicialize as configurações:**
+    Insira a topologia da rede no arquivo enlaces.config e as configurações do roteador no roteador.config
+    Certifique-se de estarem no formato exemplificado acima
+
+4.  **Compile o programa:**
+    Lembre-se que o programa só vai funcionar em um ambiente linux
+
+    ```bash
+    gcc *.c services/*.c -o router
+    ```
+
+5.  **Execute o programa:**
+    IDRoteador deve ser um inteiro de 1 a 10
+    ```bash
+    ./router IDRoteador
+    ```
+
+## Autores
+
+- **Marco Antonio Duz** Mátricula: 2311100006
+
+- **Carlos Giovane Neu Nogueira** Mátricula: 2311100010
