@@ -65,7 +65,7 @@ void printStatus() {
 }
 
 void sendPackage() {
-    char type[100], sendTo[100], payload[100];
+    char type[100], sendTo[100], payload[140];
     printf("Digite o tipo do pacote: \n0 - Controle\n1 - Dados\n\n->");
     scanf("%s", type);
 
@@ -94,6 +94,9 @@ void sendPackage() {
 
     if(sendToRouter.id == -1) {
         printf("Roteador não encontrado!\n\n");
+        return;
+    }else if(neighbors[sendToId - 1] == -1){
+        printf("Este roteador não é um vizinho!\n\n");
         return;
     }
 

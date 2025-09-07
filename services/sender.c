@@ -45,6 +45,9 @@ void sendPackageToRouter(Package package)
     if(router.id == -1) {
         printf("Roteador não encontrado!\n\n");
         return;
+    } else if(neighbors[sendToId - 1] == -1){
+        printf("Este roteador não é um vizinho!\n\n");
+        return;
     }
  
     if ( (s=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1)
