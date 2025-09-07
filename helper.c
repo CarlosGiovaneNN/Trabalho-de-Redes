@@ -72,7 +72,7 @@ Router findRouterById(int id) {
     return notFound;
 }
 
-// funcao de inicializacao dos vizinhos
+// funcao de inicializacao dos vizinhos, seta todos como -1 (sem ligação)
 void initNeighbors()
 {
     for (int i = 0; i < QTY_ROUTERS; i++)

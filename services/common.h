@@ -23,8 +23,8 @@
 
 typedef struct {
     int type;       // 0 - controle / 1 - dados
-    int sender; 
-    int receiver;
+    int sender;     //Roteador de origem do pacote
+    int receiver;   //Roteador destino do pacote
     char payload[140];  // Dados
     char buffer[100];   // Espaço livre
 } Package;

@@ -8,7 +8,7 @@ int routerId = -1;
 char server[50];
 int port = 0;
 pthread_t thread_receiver, thread_sender, thread_handler,thread_shell;
-Router routers[QTY_ROUTERS];
+Router routers[QTY_ROUTERS]; //Armazena os dados de todos os roteadores para apresentar os dados dos vizinhos
 pthread_mutex_t console_mutex;
 
 int main(int argc, char const *argv[])
@@ -38,6 +38,7 @@ int main(int argc, char const *argv[])
     pthread_mutexattr_init(&attr);
     pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE_NP);
 
+    //Inicia o mutex das filas de entrada e saída
     pthread_mutex_init(&outbound.mutex, &attr);
     pthread_mutex_init(&inbound.mutex, &attr);
 
@@ -50,7 +51,7 @@ int main(int argc, char const *argv[])
     sem_init(&inbound.hasData, 0, 0);
     sem_init(&inbound.empty, 0, QTY_ROUTERS);
     
-    // cria as threads
+    // cria as e inicia as threads
     if(pthread_create(&thread_receiver, NULL, &run_receiver, NULL) != 0) {
         printf("Falha ao criar a thread do receiver");
         return -1;
@@ -75,7 +76,7 @@ int main(int argc, char const *argv[])
         return -1;
     }
 
-    // aguarda as threads
+    // aguarda as threads, assim que forem finalizadas a main continua
     pthread_join(thread_receiver, NULL);
     pthread_join(thread_sender, NULL);
     pthread_join(thread_handler, NULL);
