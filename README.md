@@ -21,8 +21,6 @@ Na versão final, os nós executarão o **algoritmo Bellman-Ford distribuído** 
   - `roteador.config` (IP, porta e ID do roteador)  
   - `enlaces.config` (IDRoteador, IDRoteadorVizinho, custo)  
 - Roteadores trocam informações periodicamente até a convergência da tabela de rotas.  
-<!-- - Roteadores podem ser **ligados/desligados** dinamicamente.  
-- Detecção do problema de **contagem ao infinito** (limitada por um valor máximo).   -->
 - Cada atualização deve imprimir no console a **tabela de roteamento com timestamp**.  
 - **Envio de mensagens de até 140 caracteres** entre quaisquer roteadores, roteadas conforme o algoritmo de Bellman-Ford.  
 
@@ -40,27 +38,6 @@ Na versão final, os nós executarão o **algoritmo Bellman-Ford distribuído** 
 - **Mensagens de controle e dados:** tipo, origem, destino, payload.  
 - **Filas de entrada e saída** (uso de mutex para sincronização) e semáfotros para evitar espera ociosa.  
 - **Tabela de roteamento** baseada em vetores distância.  
-
-<!-- ---
-
-## 📑 Etapas do Projeto  
-
-### Etapa 01 – **30/09/2025**
-- Implementação básica do roteador multithread.  
-- Estruturas de mensagens, filas de entrada/saída.  
-- Envio e recepção de mensagens simples entre vizinhos.  
-
-### Etapa 02 – **19/10/2025**
-- Definição de vetores distância e tabela de roteamento.  
-- Envio periódico do vetor distância aos vizinhos.  
-- Opção de visualizar os vetores recebidos.  
-
-### Etapa 03 (Final) – **09/11/2025**
-- Implementação completa do **Bellman-Ford distribuído**.  
-- Atualização automática da tabela de rotas.  
-- Encaminhamento de mensagens de dados entre quaisquer roteadores.  
-
-### Apresentação final – **13 e 14/11/2025** -->
 
 ---
 
@@ -109,8 +86,9 @@ Exemplo:
     ````
 
 3.  **Inicialize as configurações:**
-    Insira a topologia da rede no arquivo enlaces.config e as configurações do roteador no roteador.config
-    Certifique-se de estarem no formato exemplificado acima
+   - Dentro do arquivo common.h defina a quantidade de roteadores na variável QTY_ROUTERS
+   - Insira a topologia da rede no arquivo enlaces.config e as configurações do roteador no roteador.config
+   OBS: Certifique-se de os arquvios estarem no formato exemplificado acima e que os IDs dos roteadores estejam no intervalo [1, QTY_ROUTERS]
 
 4.  **Compile o programa:**
     Lembre-se que o programa só vai funcionar em um ambiente linux
