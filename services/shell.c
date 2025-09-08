@@ -74,7 +74,7 @@ void sendPackage() {
         }
     }
     printf("\n->");
-    scanf("%99s", sendTo);
+    scanf(" %99s", sendTo);
 
     int sendToId = atoi(sendTo);
 
@@ -94,7 +94,8 @@ void sendPackage() {
     }
 
     printf("Digite o tipo do pacote: \n0 - Controle\n1 - Dados\n\n->");
-    scanf("%9s", type);
+    scanf(" %9s", type);
+    //Por algum motivo se voce colocar algo com epaço aqui nesse scanf ele encerra o programa
 
     if(!strcmp(type, "0") == 0 && !strcmp(type, "1") == 0) {
         printf("Tipo inválido!\n\n");
@@ -104,7 +105,7 @@ void sendPackage() {
 
     printf("Digite o payload: ");
     printf("\n->");
-    scanf("%139s", payload);
+    scanf(" %[^\n]", payload);
 
     Package package;
 
