@@ -65,44 +65,46 @@ void printStatus() {
 }
 
 void sendPackage() {
-    char type[100], sendTo[100], payload[140];
+    char type[10], sendTo[100], payload[140];
+
+    printf("Digite o numero do roteador que deseja enviar o pacote:\n");
+    for (int i = 0; i < QTY_ROUTERS; i++) {
+        if (neighbors[i].id != routerId && neighbors[i].id != -1) {
+            printf("%d - %s:%d\n", neighbors[i].id, neighbors[i].ip, neighbors[i].port);
+        }
+    }
+    printf("\n->");
+    scanf("%99s", sendTo);
+
+    int sendToId = atoi(sendTo);
+
+    if((sendToId <= 0 || sendToId == routerId || sendToId > QTY_ROUTERS)) {
+        printf("Roteador inválido!\n\n");
+        return;
+    }
+
+    Router sendToRouter = neighbors[sendToId - 1];
+
+    if(sendToRouter.id == -1) {
+        printf("Roteador não encontrado!\n\n");
+        return;
+    }else if(sendToRouter.cost == -1){
+        printf("Este roteador não é um vizinho!\n\n");
+        return;
+    }
+
     printf("Digite o tipo do pacote: \n0 - Controle\n1 - Dados\n\n->");
-    scanf("%s", type);
+    scanf("%9s", type);
 
     if(!strcmp(type, "0") == 0 && !strcmp(type, "1") == 0) {
         printf("Tipo inválido!\n\n");
         return;
     }
 
-    printf("Digite o numero do roteador que deseja enviar o pacote:\n");
-    for (int i = 0; i < QTY_ROUTERS; i++) {
-        if (routers[i].id != routerId && routers[i].id != -1) {
-            printf("%d - %s:%d\n", routers[i].id, routers[i].ip, routers[i].port);
-        }
-    }
-    printf("\n->");
-    scanf("%s", sendTo);
-
-    int sendToId = atoi(sendTo);
-
-    if((sendToId < 0 || sendToId == routerId)) {
-        printf("Roteador inválido!\n\n");
-        return;
-    }
-
-    Router sendToRouter = findRouterById(sendToId);
-
-    if(sendToRouter.id == -1) {
-        printf("Roteador não encontrado!\n\n");
-        return;
-    }else if(neighbors[sendToId - 1] == -1){
-        printf("Este roteador não é um vizinho!\n\n");
-        return;
-    }
 
     printf("Digite o payload: ");
     printf("\n->");
-    scanf("%s", payload);
+    scanf("%139s", payload);
 
     Package package;
 
@@ -118,8 +120,8 @@ void sendPackage() {
 
 void showNeighbors() {
     for (int i = 0; i < QTY_ROUTERS; i++) {
-        if (routers[i].id != routerId && routers[i].id != -1 && neighbors[i] != -1) {
-            printf("Vizinho: %d - %s:%d, custo: %d\n", routers[i].id, routers[i].ip, routers[i].port, neighbors[i]);
+        if (neighbors[i].id != routerId && neighbors[i].id != -1 && neighbors[i].cost != -1) {
+            printf("Vizinho: %d - %s:%d, custo: %d\n", neighbors[i].id, neighbors[i].ip, neighbors[i].port, neighbors[i].cost);
         }
     }
     printf("\n----------------------\n");

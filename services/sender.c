@@ -40,12 +40,11 @@ void sendPackageToRouter(Package package)
     char buf[BUFLEN];
     char message[BUFLEN];
 
-    Router router = findRouterById(package.receiver);
-
+    Router router = neighbors[package.receiver - 1];
     if(router.id == -1) {
         printf("Roteador não encontrado!\n\n");
         return;
-    } else if(neighbors[sendToId - 1] == -1){
+    } else if(router.cost == -1){
         printf("Este roteador não é um vizinho!\n\n");
         return;
     }

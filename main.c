@@ -3,12 +3,11 @@
 
 Queue inbound; //Fila de entrada
 Queue outbound; //Fila de saida
-int neighbors[QTY_ROUTERS];
 int routerId = -1;
 char server[50];
 int port = 0;
 pthread_t thread_receiver, thread_sender, thread_handler,thread_shell;
-Router routers[QTY_ROUTERS]; //Armazena os dados de todos os roteadores para apresentar os dados dos vizinhos
+Router neighbors[QTY_ROUTERS]; //Armazena os dados de todos os roteadores e os vizinhos são representados por aqueles que tem um cost > 0 
 pthread_mutex_t console_mutex;
 
 int main(int argc, char const *argv[])
@@ -23,7 +22,7 @@ int main(int argc, char const *argv[])
     else
     {
         routerId = atoi(argv[1]);
-        if (routerId < 0)
+        if (routerId <= 0 || routerId > QTY_ROUTERS)
         {
             printf("ID do roteador invalido\n");
             return 1;

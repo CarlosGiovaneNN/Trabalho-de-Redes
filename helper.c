@@ -58,36 +58,20 @@ void printQueue(Queue* queue) {
     printf("----------------------\n\n");
 }
 
-// funcao de encontrar um roteador pelo id, caso n encontre retorna um roteador com id -1
-Router findRouterById(int id) {
-    for (int i = 0; i < QTY_ROUTERS; i++) {
-        if (routers[i].id == id) {
-            return routers[i];
-        }
-    }
-
-    Router notFound;
-    notFound.id = -1;
-
-    return notFound;
-}
-
-// funcao de inicializacao dos vizinhos, seta todos como -1 (sem ligação)
-void initNeighbors()
-{
-    for (int i = 0; i < QTY_ROUTERS; i++)
-    {
-        neighbors[i] = -1;
-    }
-    neighbors[routerId - 1] = 0;
-}
 
 // funcao de limpar os roteadores
 void clearRouters()
 {
     for (int i = 0; i < QTY_ROUTERS; i++)
     {
-        routers[i].id = -1;
+        if(routerId - 1 != i){
+            neighbors[i].id = -1;
+            neighbors[i].cost = -1;
+        }
+        else{
+            neighbors[i].id = routerId;
+            neighbors[i].cost = 0;
+        }
     }
 }
 
@@ -98,7 +82,6 @@ int readConfigs()
     FILE *arquivo;
     int numberLine = 1;
     char line[50];
-    initNeighbors();
     clearRouters();
 
     // iniciando a leitura do arquivo de enlaces.config
@@ -118,11 +101,11 @@ int readConfigs()
         {
             if (router1 == routerId)
             {
-                neighbors[router2 - 1] = cost;
+                neighbors[router2 - 1].cost = cost;
             }
             else if (router2 == routerId)
             {
-                neighbors[router1 - 1] = cost;
+                neighbors[router1 - 1].cost = cost;
             }
         }
         else
@@ -143,7 +126,6 @@ int readConfigs()
         return 1;
     }
 
-    int routerindex = 0;
     numberLine = 1;
 
     while (fgets(line, sizeof(line), arquivo) != NULL)
@@ -154,15 +136,17 @@ int readConfigs()
 
         if (qtyValues == 3)
         {
-            routers[routerindex].id = router;
-            strcpy(routers[routerindex].ip, ip);
-            routers[routerindex].port = PORT;
-            routerindex++;
             if (router == routerId)
             {
                 port = PORT;
                 strcpy(server, ip);
             } 
+
+            ///NOVA MANEIRA DE FAZER TESTANDO
+            neighbors[router - 1].id = router;
+            strcpy(neighbors[router - 1].ip, ip);
+            neighbors[router - 1].port = PORT;
+
         }
         else
         {

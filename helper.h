@@ -13,6 +13,4 @@ void readConfigs();
 
 void die(const char *s);
 
-Router findRouterById(int id);
-
 #endif

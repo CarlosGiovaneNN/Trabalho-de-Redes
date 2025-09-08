@@ -42,16 +42,16 @@ typedef struct {
     char id;
     char ip[50];
     int port;
+    int cost;
 } Router;
 
 extern Queue inbound;
 extern Queue outbound;
-extern int neighbors[QTY_ROUTERS];
 extern int routerId;
 extern char server[50];
 extern int port;
 extern pthread_t thread_receiver, thread_sender, thread_handler,thread_shell;
-extern Router routers[QTY_ROUTERS];
+extern Router neighbors[QTY_ROUTERS];
 extern pthread_mutex_t console_mutex;
 
 #endif
