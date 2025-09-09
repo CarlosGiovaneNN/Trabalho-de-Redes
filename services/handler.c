@@ -1,17 +1,19 @@
 #include "common.h"
 #include "../helper.h"
 
-void* run_handler(void* arg) {
+void *run_handler(void *arg)
+{
     printf("Handler iniciado.\n");
 
-    //aq seria so o print da filo de entrada e a remocao da primeira mensagem
-    while(1) {
+    // aq seria so o print da filo de entrada e a remocao da primeira mensagem
+    while (1)
+    {
         sem_wait(&inbound.hasData);
 
         pthread_mutex_lock(&inbound.mutex);
 
         pthread_mutex_lock(&console_mutex);
-        
+
         printQueue(&inbound);
 
         removeFromInboundQueue();
@@ -21,7 +23,7 @@ void* run_handler(void* arg) {
         pthread_mutex_unlock(&inbound.mutex);
 
         sem_post(&inbound.empty);
-        
+
         usleep(1000);
     }
     return NULL;

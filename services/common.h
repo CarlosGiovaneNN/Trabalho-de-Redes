@@ -17,28 +17,33 @@
 
 #define QTY_ROUTERS 10
 #define BUFLEN sizeof(Package)
+#define CONTROL 0
+#define DATA 1
 
 #define pathConfigEnlaces "configs/enlaces.config"
 #define pathConfigRoteador "configs/roteador.config"
 
-typedef struct {
-    int type;       // 0 - controle / 1 - dados
-    int sender;     //Roteador de origem do pacote
-    int receiver;   //Roteador destino do pacote
-    char payload[140];  // Dados
-    char buffer[100];   // Espaço livre
+typedef struct
+{
+    int type;          // 0 - controle / 1 - dados
+    int sender;        // Roteador de origem do pacote
+    int receiver;      // Roteador destino do pacote
+    char payload[140]; // Dados
+    char buffer[100];  // Espaço livre
 } Package;
 
-typedef struct {
+typedef struct
+{
     Package queue[QTY_ROUTERS];
     int first;
-    int last; 
+    int last;
     pthread_mutex_t mutex;
     sem_t hasData;
     sem_t empty;
 } Queue;
 
-typedef struct {
+typedef struct
+{
     char id;
     char ip[50];
     int port;
@@ -50,7 +55,7 @@ extern Queue outbound;
 extern int routerId;
 extern char server[50];
 extern int port;
-extern pthread_t thread_receiver, thread_sender, thread_handler,thread_shell;
+extern pthread_t thread_receiver, thread_sender, thread_handler, thread_shell;
 extern Router neighbors[QTY_ROUTERS];
 extern pthread_mutex_t console_mutex;
 

@@ -3,10 +3,12 @@
 
 void sendPackageToRouter(Package package);
 
-void* run_sender(void* arg) {
+void *run_sender(void *arg)
+{
     printf("Sender iniciado.\n");
 
-    while(1) { 
+    while (1)
+    {
         // aq fica esperando a fila de saida ter um item
         sem_wait(&outbound.hasData);
 
@@ -22,17 +24,19 @@ void* run_sender(void* arg) {
 
         // envia o pacote
         sendPackageToRouter(packageToSend);
-        printf("Pacote enviado!\n");
+        printf(packageToSend.type == CONTROL ? "\n---------------\nPacote de controle enviado!\n---------------\n" : "\n---------------\nPacote enviado!\n---------------\n");
 
         usleep(1000);
     }
     return NULL;
 }
 
- 
 void sendPackageToRouter(Package package)
 {
-    printf("Enviando pacote...\n");
+    if (package.type == DATA)
+    {
+        printf("\nEnviando pacote...\n");
+    }
 
     // configuracoes do socket
     struct sockaddr_in si_other;
@@ -41,35 +45,37 @@ void sendPackageToRouter(Package package)
     char message[BUFLEN];
 
     Router router = neighbors[package.receiver - 1];
-    if(router.id == -1) {
+    if (router.id == -1)
+    {
         printf("Roteador não encontrado!\n\n");
         return;
-    } else if(router.cost == -1){
+    }
+    else if (router.cost == -1 && package.type == DATA)
+    {
         printf("Este roteador não é um vizinho!\n\n");
         return;
     }
- 
-    if ( (s=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1)
+
+    if ((s = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1)
     {
         die("socket");
     }
- 
-    memset((char *) &si_other, 0, sizeof(si_other));
+
+    memset((char *)&si_other, 0, sizeof(si_other));
     si_other.sin_family = AF_INET;
     si_other.sin_port = htons(router.port);
 
-
-    if (inet_aton(router.ip , &si_other.sin_addr) == 0) 
+    if (inet_aton(router.ip, &si_other.sin_addr) == 0)
     {
         fprintf(stderr, "inet_aton() failed\n");
         exit(1);
     }
-     
+
     // envia o pacote
-    if (sendto(s, &package, sizeof(package) , 0 , (struct sockaddr *) &si_other, slen)==-1)
+    if (sendto(s, &package, sizeof(package), 0, (struct sockaddr *)&si_other, slen) == -1)
     {
         die("sendto()");
     }
- 
+
     close(s);
 }

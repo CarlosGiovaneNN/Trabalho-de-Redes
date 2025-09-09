@@ -1,8 +1,10 @@
 #include "services/common.h"
 
 // funcao generica de adicionar mensagem a uma fila
-void addToboundQueue(Queue* queue, Package newMessage, int port, const char* server) {
-    if (queue == NULL || queue->queue == NULL) {
+void addToboundQueue(Queue *queue, Package newMessage, int port, const char *server)
+{
+    if (queue == NULL || queue->queue == NULL)
+    {
         fprintf(stderr, "Queue inválida para mensagem %s:%d\n", server, port);
         return;
     }
@@ -17,36 +19,42 @@ void addToboundQueue(Queue* queue, Package newMessage, int port, const char* ser
     sem_post(&queue->hasData);
 }
 
-
-void addToOutboundQueue(Package newMessage, int port, char* server) {
+void addToOutboundQueue(Package newMessage, int port, char *server)
+{
     addToboundQueue(&outbound, newMessage, port, server);
 }
 
-void addToInboundQueue( Package newMessage, int port,  char* server) {
+void addToInboundQueue(Package newMessage, int port, char *server)
+{
     addToboundQueue(&inbound, newMessage, port, server);
 }
 
 // funcao generica de remover mensagem de uma fila
-void removeFromQueue(Queue* queue) {
+void removeFromQueue(Queue *queue)
+{
     memset(&queue->queue[queue->first], 0, sizeof(Package));
     queue->first = (queue->first + 1) % QTY_ROUTERS;
 }
 
-void removeFromInboundQueue() {
+void removeFromInboundQueue()
+{
     removeFromQueue(&inbound);
 }
 
-void removeFromOutboundQueue() {
+void removeFromOutboundQueue()
+{
     removeFromQueue(&outbound);
 }
 
 // funcao generica de imprimir uma fila
-void printQueue(Queue* queue) {
+void printQueue(Queue *queue)
+{
     printf("\n\n----------------------\n");
     printf("\nFila de %s: \n", queue == &inbound ? "entrada" : "saida");
     printf("\n----------------------\n");
 
-    for (int i = queue->first; i != queue->last; i = (i + 1) % QTY_ROUTERS) {
+    for (int i = queue->first; i != queue->last; i = (i + 1) % QTY_ROUTERS)
+    {
         Package message = queue->queue[i];
         printf("Tipo: %d\n", message.type);
         printf("Remetente: %d\n", message.sender);
@@ -54,21 +62,22 @@ void printQueue(Queue* queue) {
         printf("Payload: %s\n", message.payload);
         printf("----------------------\n");
     }
-    
+
     printf("----------------------\n\n");
 }
-
 
 // funcao de limpar os roteadores
 void clearRouters()
 {
     for (int i = 0; i < QTY_ROUTERS; i++)
     {
-        if(routerId - 1 != i){
+        if (routerId - 1 != i)
+        {
             neighbors[i].id = -1;
             neighbors[i].cost = -1;
         }
-        else{
+        else
+        {
             neighbors[i].id = routerId;
             neighbors[i].cost = 0;
         }
@@ -140,13 +149,12 @@ int readConfigs()
             {
                 port = PORT;
                 strcpy(server, ip);
-            } 
+            }
 
-            ///NOVA MANEIRA DE FAZER TESTANDO
+            /// NOVA MANEIRA DE FAZER TESTANDO
             neighbors[router - 1].id = router;
             strcpy(neighbors[router - 1].ip, ip);
             neighbors[router - 1].port = PORT;
-
         }
         else
         {
@@ -164,7 +172,8 @@ int readConfigs()
 }
 
 // funcao de tratamento de erros
-void die(const char *s) {
+void die(const char *s)
+{
     perror(s);
     exit(1);
 }
