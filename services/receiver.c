@@ -45,7 +45,7 @@ void *run_receiver(void *arg)
         }
 
         // adiciona o pacote na fila
-        addToInboundQueue(pkg, ntohs(si_other.sin_port), inet_ntoa(si_other.sin_addr));
+        addToInboundQueue(pkg);
     }
 
     close(s);

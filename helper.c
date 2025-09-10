@@ -1,14 +1,8 @@
 #include "services/common.h"
 
 // funcao generica de adicionar mensagem a uma fila
-void addToboundQueue(Queue *queue, Package newMessage, int port, const char *server)
+void addToboundQueue(Queue *queue, Package newMessage)
 {
-    if (queue == NULL || queue->queue == NULL)
-    {
-        fprintf(stderr, "Queue inválida para mensagem %s:%d\n", server, port);
-        return;
-    }
-
     sem_wait(&queue->empty);
 
     pthread_mutex_lock(&(queue->mutex));
@@ -19,14 +13,14 @@ void addToboundQueue(Queue *queue, Package newMessage, int port, const char *ser
     sem_post(&queue->hasData);
 }
 
-void addToOutboundQueue(Package newMessage, int port, char *server)
+void addToOutboundQueue(Package newMessage)
 {
-    addToboundQueue(&outbound, newMessage, port, server);
+    addToboundQueue(&outbound, newMessage);
 }
 
-void addToInboundQueue(Package newMessage, int port, char *server)
+void addToInboundQueue(Package newMessage)
 {
-    addToboundQueue(&inbound, newMessage, port, server);
+    addToboundQueue(&inbound, newMessage);
 }
 
 // funcao generica de remover mensagem de uma fila
@@ -176,4 +170,44 @@ void die(const char *s)
 {
     perror(s);
     exit(1);
+}
+
+void sendNeighborsToControlPackage()
+{
+    char messagePayload[PAYLOAD_SIZE] = "";
+
+    for (int i = 0; i < QTY_ROUTERS; i++)
+    {
+        if (neighbors[i].id != -1)
+        {
+            char buffer[100];
+            sprintf(buffer, "%d:%d;", neighbors[i].id, neighbors[i].cost);
+
+            if (strlen(messagePayload) + strlen(buffer) < PAYLOAD_SIZE)
+            {
+                strcat(messagePayload, buffer);
+            }
+            else
+            {
+                printf("ERRO: payload estourou!\n");
+                break;
+            }
+        }
+    }
+
+    for (int i = 0; i < QTY_ROUTERS; i++)
+    {
+        if (neighbors[i].id != routerId && neighbors[i].cost != -1 && neighbors[i].id != -1)
+        {
+            Package pkg;
+
+            pkg.type = CONTROL;
+            pkg.sender = routerId;
+            pkg.receiver = neighbors[i].id;
+
+            strcpy(pkg.payload, messagePayload);
+
+            addToOutboundQueue(pkg);
+        }
+    }
 }

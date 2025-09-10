@@ -6,7 +6,8 @@ Queue outbound; // Fila de saida
 int routerId = -1;
 char server[50];
 int port = 0;
-pthread_t thread_receiver, thread_sender, thread_handler, thread_shell;
+int timeToControlPackage = 10;
+pthread_t thread_receiver, thread_sender, thread_handler, thread_shell, thread_cron;
 Router neighbors[QTY_ROUTERS]; // Armazena os dados de todos os roteadores e os vizinhos são representados por aqueles que tem um cost > 0
 pthread_mutex_t console_mutex;
 pthread_mutex_t routers_mutex;
@@ -76,6 +77,13 @@ int main(int argc, char const *argv[])
     }
 
     usleep(1000);
+    if (pthread_create(&thread_cron, NULL, &run_cron, NULL) != 0)
+    {
+        printf("Falha ao criar a thread do cron");
+        return -1;
+    }
+
+    usleep(1000);
     if (pthread_create(&thread_shell, NULL, &run_shell, NULL) != 0)
     {
         printf("Falha ao criar a thread do shell");
@@ -83,10 +91,35 @@ int main(int argc, char const *argv[])
     }
 
     // aguarda as threads, assim que forem finalizadas a main continua
-    pthread_join(thread_receiver, NULL);
-    pthread_join(thread_sender, NULL);
-    pthread_join(thread_handler, NULL);
-    pthread_join(thread_shell, NULL);
+    if (pthread_join(thread_receiver, NULL) != 0)
+    {
+        printf("Falha ao juntar a thread do receiver");
+        return -1;
+    }
+
+    if (pthread_join(thread_sender, NULL) != 0)
+    {
+        printf("Falha ao juntar a thread do sender");
+        return -1;
+    }
+
+    if (pthread_join(thread_handler, NULL) != 0)
+    {
+        printf("Falha ao juntar a thread do handler");
+        return -1;
+    }
+
+    if (pthread_join(thread_cron, NULL) != 0)
+    {
+        printf("Falha ao juntar a thread do cron");
+        return -1;
+    }
+
+    if (pthread_join(thread_shell, NULL) != 0)
+    {
+        printf("Falha ao juntar a thread do shell");
+        return -1;
+    }
 
     return 0;
 }

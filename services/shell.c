@@ -139,7 +139,7 @@ void sendPackage()
     package.receiver = sendToId;
     strcpy(package.payload, payload);
 
-    addToOutboundQueue(package, sendToRouter.port, sendToRouter.ip);
+    addToOutboundQueue(package);
 
     usleep(1000);
 }
@@ -198,7 +198,7 @@ void configurateDistance()
 
     int cost = atoi(buffer);
 
-    if(cost < 0)
+    if (cost < 0)
     {
         printf("Custo inválido!\n\n");
         return;
@@ -208,10 +208,23 @@ void configurateDistance()
 
     Package sendToRouterPackage;
 
-    
+    sendNeighborsToControlPackage();
+}
 
-    //addToOutboundQueue(DATA, sendToRouter.port, sendToRouter.ip);
+void configurateTime()
+{
+    char buffer[100];
+    printf("Tempo de envio de pacotes de controle(em segundos): ");
+    printf("\n->");
+    scanf(" %99s", buffer);
 
+    if (atoi(buffer) < 0)
+    {
+        printf("Tempo inválido!\n\n");
+        return;
+    }
+
+    timeToControlPackage = atoi(buffer);
 }
 
 void configuration()
@@ -219,4 +232,21 @@ void configuration()
     printf("Digite o numero da configuracao: \n");
     printf("1 - Configurar distancias dos roteadores\n");
     printf("2 - Configurar tempo de envio de pacotes de controle\n");
+
+    char buffer[100];
+    printf("\n->");
+    scanf(" %99s", buffer);
+
+    if (atoi(buffer) == 1)
+    {
+        configurateDistance();
+    }
+    else if (atoi(buffer) == 2)
+    {
+        configurateTime();
+    }
+    else
+    {
+        printf("Configuracao invalida!\n\n");
+    }
 }
