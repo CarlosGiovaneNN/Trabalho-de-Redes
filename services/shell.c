@@ -70,7 +70,11 @@ void sendPackage() {
     printf("Digite o numero do roteador que deseja enviar o pacote:\n");
     for (int i = 0; i < QTY_ROUTERS; i++) {
         if (neighbors[i].id != routerId && neighbors[i].id != -1) {
-            printf("%d - %s:%d\n", neighbors[i].id, neighbors[i].ip, neighbors[i].port);
+            printf("%d - %s:%d", neighbors[i].id, neighbors[i].ip, neighbors[i].port);
+            if(neighbors[i].cost == -1){
+                printf(" (Indisponivel) ");
+            }
+            printf("\n");
         }
     }
     printf("\n->");
