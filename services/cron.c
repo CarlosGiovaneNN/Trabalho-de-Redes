@@ -9,7 +9,7 @@ void *run_cron(void *arg)
     {
         usleep(timeToControlPackage * 1000000); // tempo x segundos
 
-        printf("\nEnviando pacotes de controle...\n");
+        // printf("\nEnviando pacotes de controle...\n");
 
         sendNeighborsToControlPackage();
     }

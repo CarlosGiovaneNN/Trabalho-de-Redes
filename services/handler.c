@@ -8,7 +8,6 @@ void *run_handler(void *arg)
 {
     printf("Handler iniciado.\n");
 
-    // aq seria so o print da filo de entrada e a remocao da primeira mensagem
     while (1)
     {
         sem_wait(&inbound.hasData);
@@ -35,6 +34,7 @@ void *run_handler(void *arg)
 
         sem_post(&inbound.empty);
     }
+
     return NULL;
 }
 
@@ -63,14 +63,22 @@ void controlMessageHandler(Package package)
 
         token = strtok(NULL, ";");
     }
+
+    dataMessageHandler(package);
 }
 
 void dataMessageHandler(Package package)
 {
-    printf("\n---------------\nPacote recebido!\n---------------\n");
-    printf("Tipo: %d\n", package.type);
-    printf("Remetente: %d\n", package.sender);
-    printf("Destinatario: %d\n", package.receiver);
-    printf("Payload: %s\n", package.payload);
-    printf("---------------\n\n");
+    if (package.receiver == routerId)
+    {
+        printf("\n---------------\nPacote recebido!\n---------------\n");
+        printf("Tipo: %d\n", package.type);
+        printf("Remetente: %d\n", package.sender);
+        printf("Destinatario: %d\n", package.receiver);
+        printf("Payload: %s\n", package.payload);
+        printf("---------------\n\n");
+    }
+    else
+    {
+    }
 }
