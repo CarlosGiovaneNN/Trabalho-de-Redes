@@ -52,6 +52,11 @@ typedef struct
     int cost;
 } Router;
 
+typedef struct {
+    int destination;
+    int cost;
+} RoutingTableEntry;
+
 extern Queue inbound;
 extern Queue outbound;
 extern int routerId;

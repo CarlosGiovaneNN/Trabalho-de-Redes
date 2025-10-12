@@ -9,6 +9,8 @@ int port = 0;
 int timeToControlPackage = 10;
 pthread_t thread_receiver, thread_sender, thread_handler, thread_shell, thread_cron;
 Router neighbors[QTY_ROUTERS]; // Armazena os dados de todos os roteadores e os vizinhos são representados por aqueles que tem um cost > 0
+RoutingTableEntry routingTable[QTY_ROUTERS];
+RoutingTableEntry lastVectors[QTY_ROUTERS][QTY_ROUTERS];
 pthread_mutex_t console_mutex;
 pthread_mutex_t routers_mutex;
 
@@ -33,6 +35,8 @@ int main(int argc, char const *argv[])
 
     // Configurando o roteador e seus vizinhos
     readConfigs();
+    // Inicializando a tabela de roteamento e a matriz dos vetores recebidos
+    initializeRoutingTables();
 
     // GPT me falou que tem que ser assim um mutex recursivo
     pthread_mutexattr_t attr;
