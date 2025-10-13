@@ -210,24 +210,27 @@ void sendNeighborsToControlPackage()
             addToOutboundQueue(pkg);
         }
     }
+}
 
-    void initializeRoutingTables(){
-        for (int i = 0; i <  QTY_ROUTERS; i++) {
-            routingTable[i].destination = i;
-            
-            if(i == routerId){
-                routingTable[i].cost = 0;
-                continue;
-            }
-            routingTable[i].cost = -1;
-        }
-
-        for (int i = 0; i < QTY_ROUTERS; i++) {
-            for (int j = 0; j < QTY_ROUTERS; j++) {
-                router->receivedVectors[i][j].destination = j;
-                router->receivedVectors[i][j].cost = -1;
-            }
-        }
+//@todo
+//Monta tudo zerado alterar para o vetor do roteador ja iniciar com 
+//o que ele sabe dos seus vizinhos
+void initializeRoutingTables(){
+    for (int i = 0; i <  QTY_ROUTERS; i++) {
+        routingTable[i].destination = i;
         
+        if(i == routerId){
+            routingTable[i].cost = 0;
+            continue;
+        }
+        routingTable[i].cost = -1;
     }
+
+    for (int i = 0; i < QTY_ROUTERS; i++) {
+        for (int j = 0; j < QTY_ROUTERS; j++) {
+            lastVectors[i][j].destination = j;
+            lastVectors[i][j].cost = -1;
+        }
+    }
+    
 }

@@ -10,6 +10,7 @@ void removeFromOutboundQueue();
 void printQueue(Queue *queue);
 
 void readConfigs();
+void initializeRoutingTables();
 
 void die(const char *s);
 
