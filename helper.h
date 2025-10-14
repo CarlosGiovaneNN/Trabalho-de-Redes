@@ -9,8 +9,9 @@ void removeFromOutboundQueue();
 
 void printQueue(Queue *queue);
 
-void readConfigs();
+int readConfigs();
 void initializeRoutingTables();
+void print_tables();
 
 void die(const char *s);
 

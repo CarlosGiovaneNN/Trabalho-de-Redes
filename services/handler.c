@@ -38,6 +38,8 @@ void *run_handler(void *arg)
     return NULL;
 }
 
+///@todo
+//Alterar onde é salva o vetor distancia recebido
 void controlMessageHandler(Package package)
 {
     char temp[PAYLOAD_SIZE];

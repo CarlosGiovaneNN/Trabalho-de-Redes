@@ -1,4 +1,6 @@
 #include "services/common.h"
+#include "helper.h"
+#include <stdio.h>
 
 // funcao generica de adicionar mensagem a uma fila
 void addToboundQueue(Queue *queue, Package newMessage)
@@ -212,25 +214,131 @@ void sendNeighborsToControlPackage()
     }
 }
 
-//@todo
-//Monta tudo zerado alterar para o vetor do roteador ja iniciar com 
-//o que ele sabe dos seus vizinhos
-void initializeRoutingTables(){
-    for (int i = 0; i <  QTY_ROUTERS; i++) {
-        routingTable[i].destination = i;
-        
-        if(i == routerId){
-            routingTable[i].cost = 0;
-            continue;
-        }
-        routingTable[i].cost = -1;
-    }
+/*
+Inicializa a tabela de roteamento para cada destino possível
+com custo -1 e proximo roteador -1, depois atualiza com o valor conhecido de seus vizinhos
+Já o vetor recebido inicializa tudo com -1, menos o do proprio roteador
+*/
+void initializeRoutingTables() {
 
     for (int i = 0; i < QTY_ROUTERS; i++) {
-        for (int j = 0; j < QTY_ROUTERS; j++) {
-            lastVectors[i][j].destination = j;
-            lastVectors[i][j].cost = -1;
+        routingTable[i].destination = i+1;
+        routingTable[i].cost = -1;
+        routingTable[i].nextRouter = -1;
+    }
+
+    routingTable[routerId - 1].cost = 0;
+    routingTable[routerId - 1].nextRouter = routerId;
+
+    for (int i = 0; i < QTY_ROUTERS; i++) {
+        if (neighbors[i].cost > 0) {
+
+            routingTable[i].cost = neighbors[i].cost;
+            routingTable[i].nextRouter = i+1;
         }
     }
     
+   for (int i = 0; i < QTY_ROUTERS; i++) {
+        for (int j = 0; j < QTY_ROUTERS; j++) {
+            lastVectors[i][j].destination = j;
+            lastVectors[i][j].cost = -1;
+            lastVectors[i][j].nextRouter = -1;
+        }
+    }
+
+    for (int i = 0; i < QTY_ROUTERS; i++) {
+        lastVectors[routerId - 1][i] = routingTable[i];
+    }
+}
+
+
+/**
+ * Peguei do gpt pq queria ver como tinha ficado as tabelas, depois da pra apagar 
+ * @brief Imprime a tabela de roteamento atual e a matriz de vetores de distância
+ * recebidos de forma formatada e segura para threads.
+ */
+void print_tables()
+{
+    // Trava o mutex do console para garantir que a impressão não seja interrompida
+    pthread_mutex_lock(&console_mutex);
+
+    printf("\n\n############################################################\n");
+    printf("###               VISUALIZACAO DAS TABELAS (Roteador %d)    ###\n", routerId);
+    printf("############################################################\n\n");
+
+    // --- Imprimindo a Tabela de Roteamento Principal ---
+    printf("=== Tabela de Roteamento ATUAL ===\n");
+    printf("+-------------+---------+---------------+\n");
+    printf("|  Destino    |  Custo  | Proximo Salto |\n");
+    printf("+-------------+---------+---------------+\n");
+
+    for (int i = 0; i < QTY_ROUTERS; i++)
+    {
+        printf("|      %2d     |", routingTable[i].destination);
+
+        // Imprime o custo de forma amigável (mostra 'inf' para infinito)
+        if (routingTable[i].cost == -1) {
+            printf("   inf   |");
+        } else {
+            printf("   %3d   |", routingTable[i].cost);
+        }
+
+        // Imprime o próximo salto (mostra '-' para indefinido)
+        if (routingTable[i].nextRouter == -1) {
+            printf("       -       |");
+        } else {
+            printf("      %2d       |", routingTable[i].nextRouter);
+        }
+
+        // Adiciona um comentário para a rota até si mesmo
+        if (routingTable[i].destination == routerId) {
+            printf(" <- (Este roteador)");
+        }
+        printf("\n");
+    }
+    printf("+-------------+---------+---------------+\n\n\n");
+
+
+    // --- Imprimindo a Matriz de Vetores Recebidos ---
+    printf("=== Matriz de Vetores de Distancia Recebidos (lastVectors) ===\n");
+    printf("         (Visao de Custo para cada Destino Dst)\n");
+
+    // Cabeçalho da matriz (Destinos)
+    printf("De \\ Dst |");
+    for (int j = 0; j < QTY_ROUTERS; j++) {
+        printf("  %2d  |", j + 1);
+    }
+    printf("\n---------+");
+    for (int j = 0; j < QTY_ROUTERS; j++) {
+        printf("------+");
+    }
+    printf("\n");
+
+    // Corpo da matriz (um roteador por linha)
+    for (int i = 0; i < QTY_ROUTERS; i++)
+    {
+        // Só imprime a linha se for um vizinho ou o próprio roteador
+        if (neighbors[i].cost != -1) {
+            printf(" Rota %2d |", neighbors[i].id); // Cabeçalho da linha (Quem enviou o vetor)
+            for (int j = 0; j < QTY_ROUTERS; j++)
+            {
+                // Imprime o custo que o roteador 'i+1' anunciou para o destino 'j+1'
+                int cost = lastVectors[i][j].cost;
+                if (cost == -1) {
+                    printf("  inf |");
+                } else {
+                    printf("  %3d |", cost);
+                }
+            }
+            if (neighbors[i].id == routerId) {
+                printf(" <- (Meu proprio vetor)");
+            }
+            printf("\n");
+        }
+    }
+    printf("------------------------------------------------------------------------\n\n");
+
+
+    // Libera o mutex do console
+    pthread_mutex_unlock(&console_mutex);
 }

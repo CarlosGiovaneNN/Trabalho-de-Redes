@@ -55,6 +55,7 @@ typedef struct
 typedef struct {
     int destination;
     int cost;
+    int nextRouter;
 } RoutingTableEntry;
 
 extern Queue inbound;
