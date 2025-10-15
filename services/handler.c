@@ -38,10 +38,14 @@ void *run_handler(void *arg)
     return NULL;
 }
 
-///@todo
-//Alterar onde é salva o vetor distancia recebido
+///@todo -> montar uma função para recalcular o roteamento
+/**
+ * A função lê o pacote de controle e atualiza a
+ * matriz de ultimos vetores salvos
+ */
 void controlMessageHandler(Package package)
 {
+    int origem = package.sender;
     char temp[PAYLOAD_SIZE];
     strcpy(temp, package.payload);
 
@@ -52,15 +56,7 @@ void controlMessageHandler(Package package)
 
         if (sscanf(token, "%d:%d", &id, &cost) == 2)
         {
-
-            for (int i = 0; i < QTY_ROUTERS; i++)
-            {
-                if (neighbors[i].id == id && package.sender == id)
-                {
-                    neighbors[i].cost = cost;
-                    break;
-                }
-            }
+            lastVectors[origem - 1][id - 1] = cost;
         }
 
         token = strtok(NULL, ";");
