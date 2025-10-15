@@ -61,7 +61,7 @@ typedef struct {
 extern Queue inbound;
 extern Queue outbound;
 extern RoutingTableEntry routingTable[QTY_ROUTERS];
-extern RoutingTableEntry lastVectors[QTY_ROUTERS][QTY_ROUTERS];
+extern int lastVectors[QTY_ROUTERS][QTY_ROUTERS];
 extern int routerId;
 extern char server[50];
 extern int port;
