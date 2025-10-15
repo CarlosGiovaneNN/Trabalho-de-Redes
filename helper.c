@@ -180,20 +180,17 @@ void sendNeighborsToControlPackage()
 
     for (int i = 0; i < QTY_ROUTERS; i++)
     {
-        if (neighbors[i].id != -1)
-        {
-            char buffer[100];
-            sprintf(buffer, "%d:%d;", neighbors[i].id, neighbors[i].cost);
+        char buffer[100];
+        sprintf(buffer, "%d:%d;", routingTable[i].destination, routingTable[i].cost);
 
-            if (strlen(messagePayload) + strlen(buffer) < PAYLOAD_SIZE)
-            {
-                strcat(messagePayload, buffer);
-            }
-            else
-            {
-                printf("ERRO: payload estourou!\n");
-                break;
-            }
+        if (strlen(messagePayload) + strlen(buffer) < PAYLOAD_SIZE)
+        {
+            strcat(messagePayload, buffer);
+        }
+        else
+        {
+            printf("ERRO: payload estourou!\n");
+            break;
         }
     }
 
