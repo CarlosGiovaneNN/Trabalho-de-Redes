@@ -237,14 +237,12 @@ void initializeRoutingTables() {
     
    for (int i = 0; i < QTY_ROUTERS; i++) {
         for (int j = 0; j < QTY_ROUTERS; j++) {
-            lastVectors[i][j].destination = j;
-            lastVectors[i][j].cost = -1;
-            lastVectors[i][j].nextRouter = -1;
+            lastVectors[i][j] = -1;
         }
     }
 
     for (int i = 0; i < QTY_ROUTERS; i++) {
-        lastVectors[routerId - 1][i] = routingTable[i];
+        lastVectors[routerId - 1][i] = routingTable[i].cost;
     }
 }
 
@@ -320,7 +318,7 @@ void print_tables()
             for (int j = 0; j < QTY_ROUTERS; j++)
             {
                 // Imprime o custo que o roteador 'i+1' anunciou para o destino 'j+1'
-                int cost = lastVectors[i][j].cost;
+                int cost = lastVectors[i][j];
                 if (cost == -1) {
                     printf("  inf |");
                 } else {
