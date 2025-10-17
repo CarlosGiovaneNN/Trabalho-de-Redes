@@ -1,28 +1,82 @@
 #include "common.h"
 #include "../helper.h"
 
-void* run_handler(void* arg) {
+void controlMessageHandler(Package package);
+void dataMessageHandler(Package package);
+
+void *run_handler(void *arg)
+{
     printf("Handler iniciado.\n");
 
-    //aq seria so o print da filo de entrada e a remocao da primeira mensagem
-    while(1) {
+    while (1)
+    {
         sem_wait(&inbound.hasData);
 
         pthread_mutex_lock(&inbound.mutex);
 
         pthread_mutex_lock(&console_mutex);
-        
-        printQueue(&inbound);
 
+        Package package = inbound.queue[inbound.first];
         removeFromInboundQueue();
+
+        if (package.type == CONTROL)
+        {
+            controlMessageHandler(package);
+        }
+        else
+        {
+            dataMessageHandler(package);
+        }
 
         pthread_mutex_unlock(&console_mutex);
 
         pthread_mutex_unlock(&inbound.mutex);
 
         sem_post(&inbound.empty);
-        
-        usleep(1000);
     }
+
     return NULL;
+}
+
+///@todo -> montar uma função para recalcular o roteamento
+/**
+ * A função lê o pacote de controle e atualiza a
+ * matriz de ultimos vetores salvos
+ */
+void controlMessageHandler(Package package)
+{
+    int origem = package.sender;
+    char temp[PAYLOAD_SIZE];
+    strcpy(temp, package.payload);
+
+    char *token = strtok(temp, ";");
+    while (token != NULL)
+    {
+        int id, cost;
+
+        if (sscanf(token, "%d:%d", &id, &cost) == 2)
+        {
+            lastVectors[origem - 1][id - 1] = cost;
+        }
+
+        token = strtok(NULL, ";");
+    }
+
+    dataMessageHandler(package);
+}
+
+void dataMessageHandler(Package package)
+{
+    if (package.receiver == routerId)
+    {
+        printf("\n---------------\nPacote recebido!\n---------------\n");
+        printf("Tipo: %d\n", package.type);
+        printf("Remetente: %d\n", package.sender);
+        printf("Destinatario: %d\n", package.receiver);
+        printf("Payload: %s\n", package.payload);
+        printf("---------------\n\n");
+    }
+    else
+    {
+    }
 }
