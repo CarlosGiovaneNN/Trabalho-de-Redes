@@ -7,13 +7,20 @@ void *run_cron(void *arg)
 {
     printf("Cron iniciado.\n");
 
+    int count = 0;
+
     while (1)
     {
         usleep(time_to_control_package * 1000000); // tempo x segundos
 
         calculate_timeout();
+        count++;
 
-        // printf("\nEnviando pacotes de controle...\n");
+        if (count == 5)
+        {
+            print_tables();
+            count = 0;
+        }
 
         send_neighbors_to_control_package();
     }
@@ -38,7 +45,7 @@ void calculate_timeout()
 
             if (seconds_elapsed > (time_to_control_package * 3))
             {
-                printf("Timeout - o vizinho id: %s foi considerado morto\n", neighbors[i].id);
+                printf("Timeout - o vizinho id: %d foi considerado morto\n", neighbors[i].id);
 
                 neighbors[i].cost = -1;
                 neighbors[i].last_time_seen = 0;

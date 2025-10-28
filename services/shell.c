@@ -88,7 +88,7 @@ void send_package()
         if (neighbors[i].id != router_id && neighbors[i].id != -1)
         {
             printf("%d - %s:%d ", neighbors[i].id, neighbors[i].ip, neighbors[i].port);
-            if (neighbors[i].cost == -1)
+            if (routing_table[i].cost == -1)
             {
                 printf("(Indisponivel) ");
             }
@@ -113,9 +113,9 @@ void send_package()
         printf("Roteador não encontrado!\n\n");
         return;
     }
-    else if (send_to_router.cost == -1)
+    else if (routing_table[send_to_id - 1].cost == -1)
     {
-        printf("Este roteador não é um vizinho!\n\n");
+        printf("Este roteador não é alcançavel!\n\n");
         return;
     }
 

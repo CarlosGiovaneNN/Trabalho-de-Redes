@@ -7,9 +7,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/socket.h> //utilização dos sockets de conexão a rede (Linux)
-#include <unistd.h>
+#include <sys/socket.h>
 #include <time.h>
+#include <unistd.h>
 
 #include "cron.h"
 #include "handler.h"

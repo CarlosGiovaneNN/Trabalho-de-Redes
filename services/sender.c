@@ -33,28 +33,35 @@ void *run_sender(void *arg)
 
 void send_package_to_router(Package package)
 {
-    if (package.type == DATA)
+    if (package.type == DATA && package.sender != router_id)
     {
         printf("\nEnviando pacote...\n");
     }
 
-    // configuracoes do socket
+    int final_destination_id = package.receiver;
+
+    pthread_mutex_lock(&routers_mutex);
+
+    RoutingTableEntry route_entry = routing_table[final_destination_id - 1];
+
+    if (route_entry.cost == -1)
+    {
+        pthread_mutex_unlock(&routers_mutex);
+
+        printf("\nDestino indisponivel!\n");
+
+        return;
+    }
+
+    char ip[50];
+
+    int port = neighbors[route_entry.next_router - 1].port;
+    strcpy(ip, neighbors[route_entry.next_router - 1].ip);
+
+    pthread_mutex_unlock(&routers_mutex);
+
     struct sockaddr_in si_other;
     int s, i, slen = sizeof(si_other);
-    char buf[BUFLEN];
-    char message[BUFLEN];
-
-    Router router = neighbors[package.receiver - 1];
-    if (router.id == -1)
-    {
-        printf("Roteador não encontrado!\n\n");
-        return;
-    }
-    else if (router.cost == -1 && package.type == DATA)
-    {
-        printf("Este roteador não é um vizinho!\n\n");
-        return;
-    }
 
     if ((s = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1)
     {
@@ -63,9 +70,9 @@ void send_package_to_router(Package package)
 
     memset((char *)&si_other, 0, sizeof(si_other));
     si_other.sin_family = AF_INET;
-    si_other.sin_port = htons(router.port);
+    si_other.sin_port = htons(port);
 
-    if (inet_aton(router.ip, &si_other.sin_addr) == 0)
+    if (inet_aton(ip, &si_other.sin_addr) == 0)
     {
         fprintf(stderr, "inet_aton() failed\n");
         exit(1);

@@ -15,12 +15,20 @@ void add_to_queue(Queue *queue, Package new_message)
 
 void add_to_outbound_queue(Package new_message)
 {
+    pthread_mutex_lock(&outbound.mutex);
+
     add_to_queue(&outbound, new_message);
+
+    pthread_mutex_unlock(&outbound.mutex);
 }
 
 void add_to_inbound_queue(Package new_message)
 {
+    pthread_mutex_lock(&inbound.mutex);
+
     add_to_queue(&inbound, new_message);
+
+    pthread_mutex_unlock(&inbound.mutex);
 }
 
 // funcao generica de remover mensagem de uma fila
@@ -32,12 +40,20 @@ void remove_from_queue(Queue *queue)
 
 void remove_from_inbound_queue()
 {
+    pthread_mutex_lock(&inbound.mutex);
+
     remove_from_queue(&inbound);
+
+    pthread_mutex_unlock(&inbound.mutex);
 }
 
 void remove_from_outbound_queue()
 {
+    pthread_mutex_lock(&outbound.mutex);
+
     remove_from_queue(&outbound);
+
+    pthread_mutex_unlock(&outbound.mutex);
 }
 
 // funcao generica de imprimir uma fila
@@ -179,6 +195,8 @@ void send_neighbors_to_control_package()
 {
     char message_payload[PAYLOAD_SIZE] = "";
 
+    pthread_mutex_lock(&routers_mutex);
+
     for (int i = 0; i < QTY_ROUTERS; i++)
     {
         char buffer[100];
@@ -210,6 +228,8 @@ void send_neighbors_to_control_package()
             add_to_outbound_queue(pkg);
         }
     }
+
+    pthread_mutex_unlock(&routers_mutex);
 }
 
 /*
@@ -255,7 +275,8 @@ void initialize_routing_tables()
 }
 
 /**
- * @todo
+ * Atualiza a tabela de roteamento local usando o algoritmo
+ * de Bellman-Ford.
  */
 void update_routing_table()
 {
@@ -270,19 +291,31 @@ void update_routing_table()
             continue;
         }
 
+        int cost_to_neighbor = neighbors[i].cost;
+
         for (int j = 0; j < QTY_ROUTERS; j++)
         {
-            int lower_cost = routing_table[j].cost;
-            int current_cost = -1;
-            if (last_vectors[i][j] > 0 && neighbors[i].cost > 0)
+            if (j == router_id - 1)
             {
-                current_cost = last_vectors[i][j] + neighbors[i].cost;
+                continue;
             }
 
-            if ((current_cost < lower_cost || lower_cost == -1) && current_cost != 1)
+            int cost_neighbor_to_dest = last_vectors[i][j];
+
+            if (cost_neighbor_to_dest == -1)
+            {
+                continue;
+            }
+
+            int new_path_cost = cost_to_neighbor + cost_neighbor_to_dest;
+            int existing_cost = routing_table[j].cost;
+
+            if (new_path_cost < existing_cost || existing_cost == -1)
             {
                 change_table = 1;
-                routing_table[j].cost = current_cost;
+                routing_table[j].cost = new_path_cost;
+
+                routing_table[j].next_router = i + 1;
             }
         }
     }
@@ -291,7 +324,7 @@ void update_routing_table()
 
     if (change_table)
     {
-        // Aqui mudou a tabela tem q mandar o vetor de novo pros vizinhos
+        send_neighbors_to_control_package();
     }
 }
 

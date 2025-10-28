@@ -56,8 +56,6 @@ void control_message_handler(Package package)
 
     neighbors[origem - 1].last_time_seen = now;
 
-    pthread_mutex_unlock(&routers_mutex);
-
     char *token = strtok(temp, ";");
     while (token != NULL)
     {
@@ -71,8 +69,10 @@ void control_message_handler(Package package)
         token = strtok(NULL, ";");
     }
 
-    update_routing_table();        // atualiza a routing table
-    data_message_handler(package); // mostra a mensagem de controle recebida
+    pthread_mutex_unlock(&routers_mutex);
+
+    update_routing_table();
+    data_message_handler(package);
 }
 
 void data_message_handler(Package package)
@@ -88,5 +88,17 @@ void data_message_handler(Package package)
     }
     else
     {
+        pthread_mutex_lock(&outbound.mutex);
+
+        if (package.type == DATA)
+        {
+            printf("\n--------------------------------");
+            printf("Enviando pacote de %d para %d", package.sender, package.receiver);
+            printf("\n--------------------------------\n");
+        }
+
+        add_to_outbound_queue(package);
+
+        pthread_mutex_unlock(&outbound.mutex);
     }
 }
