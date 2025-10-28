@@ -1,7 +1,7 @@
-#include "common.h"
 #include "../helper.h"
+#include "common.h"
 
-void sendPackageToRouter(Package package);
+void send_package_to_router(Package package);
 
 void *run_sender(void *arg)
 {
@@ -10,28 +10,28 @@ void *run_sender(void *arg)
     while (1)
     {
         // aq fica esperando a fila de saida ter um item
-        sem_wait(&outbound.hasData);
+        sem_wait(&outbound.has_data);
 
         pthread_mutex_lock(&outbound.mutex);
 
         // remove o pacote da fila
-        Package packageToSend = outbound.queue[outbound.first];
-        removeFromOutboundQueue();
+        Package package_to_send = outbound.queue[outbound.first];
+        remove_from_outbound_queue();
 
         pthread_mutex_unlock(&outbound.mutex);
 
         sem_post(&outbound.empty);
 
         // envia o pacote
-        sendPackageToRouter(packageToSend);
-        printf(packageToSend.type == CONTROL ? "\n" : "\n---------------\nPacote enviado!\n---------------\n");
+        send_package_to_router(package_to_send);
+        printf(package_to_send.type == CONTROL ? "\n" : "\n---------------\nPacote enviado!\n---------------\n");
 
         usleep(1000);
     }
     return NULL;
 }
 
-void sendPackageToRouter(Package package)
+void send_package_to_router(Package package)
 {
     if (package.type == DATA)
     {

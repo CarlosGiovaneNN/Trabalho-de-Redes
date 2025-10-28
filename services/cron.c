@@ -1,5 +1,5 @@
-#include "common.h"
 #include "../helper.h"
+#include "common.h"
 
 void *run_cron(void *arg)
 {
@@ -7,11 +7,11 @@ void *run_cron(void *arg)
 
     while (1)
     {
-        usleep(timeToControlPackage * 1000000); // tempo x segundos
+        usleep(time_to_control_package * 1000000); // tempo x segundos
 
         // printf("\nEnviando pacotes de controle...\n");
 
-        sendNeighborsToControlPackage();
+        send_neighbors_to_control_package();
     }
 
     return NULL;

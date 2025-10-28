@@ -1,20 +1,20 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
+#include <arpa/inet.h> //converter endereços de Internet (como endereços IP) entre seu formato de texto e seu formato numérico binário.
 #include <pthread.h>
 #include <semaphore.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <sys/socket.h> //utilização dos sockets de conexão a rede (Linux)
-#include <arpa/inet.h>  //converter endereços de Internet (como endereços IP) entre seu formato de texto e seu formato numérico binário.
 #include <unistd.h>
 
-#include "shell.h"
+#include "cron.h"
+#include "handler.h"
 #include "receiver.h"
 #include "sender.h"
-#include "handler.h"
-#include "cron.h"
+#include "shell.h"
 
 #define QTY_ROUTERS 10
 #define BUFLEN sizeof(Package)
@@ -22,8 +22,8 @@
 #define DATA 1
 #define PAYLOAD_SIZE 140
 
-#define pathConfigEnlaces "configs/enlaces.config"
-#define pathConfigRoteador "configs/roteador.config"
+#define PATH_CONFIG_ENLACES "configs/enlaces.config"
+#define PATH_CONFIG_ROTERS "configs/roteador.config"
 
 typedef struct
 {
@@ -40,7 +40,7 @@ typedef struct
     int first;
     int last;
     pthread_mutex_t mutex;
-    sem_t hasData;
+    sem_t has_data;
     sem_t empty;
 } Queue;
 
@@ -52,20 +52,21 @@ typedef struct
     int cost;
 } Router;
 
-typedef struct {
+typedef struct
+{
     int destination;
     int cost;
-    int nextRouter;
+    int next_router;
 } RoutingTableEntry;
 
 extern Queue inbound;
 extern Queue outbound;
-extern RoutingTableEntry routingTable[QTY_ROUTERS];
-extern int lastVectors[QTY_ROUTERS][QTY_ROUTERS];
-extern int routerId;
+extern RoutingTableEntry routing_table[QTY_ROUTERS];
+extern int last_vectors[QTY_ROUTERS][QTY_ROUTERS];
+extern int router_id;
 extern char server[50];
 extern int port;
-extern int timeToControlPackage;
+extern int time_to_control_package;
 extern pthread_t thread_receiver, thread_sender, thread_handler, thread_shell;
 extern Router neighbors[QTY_ROUTERS];
 extern pthread_mutex_t console_mutex;

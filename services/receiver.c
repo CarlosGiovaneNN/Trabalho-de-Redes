@@ -1,5 +1,5 @@
-#include "common.h"
 #include "../helper.h"
+#include "common.h"
 
 void *run_receiver(void *arg)
 {
@@ -45,7 +45,7 @@ void *run_receiver(void *arg)
         }
 
         // adiciona o pacote na fila
-        addToInboundQueue(pkg);
+        add_to_inbound_queue(pkg);
     }
 
     close(s);

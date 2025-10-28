@@ -1,11 +1,11 @@
-#include "common.h"
 #include "../helper.h"
+#include "common.h"
 
-int showMenu();
-void exitRouter();
-void printStatus();
-void sendPackage();
-void showNeighbors();
+int show_menu();
+void exit_router();
+void print_status();
+void send_package();
+void show_neighbors();
 void configuration();
 
 void *run_shell(void *arg)
@@ -14,13 +14,13 @@ void *run_shell(void *arg)
 
     while (1)
     {
-        int buffer = showMenu();
+        int buffer = show_menu();
 
         pthread_mutex_lock(&console_mutex);
 
         if (buffer == 0)
         {
-            exitRouter();
+            exit_router();
             pthread_mutex_unlock(&console_mutex);
             break;
         }
@@ -30,15 +30,15 @@ void *run_shell(void *arg)
         }
         else if (buffer == 3)
         {
-            showNeighbors();
+            show_neighbors();
         }
         else if (buffer == 2)
         {
-            printStatus();
+            print_status();
         }
         else if (buffer == 1)
         {
-            sendPackage();
+            send_package();
         }
 
         pthread_mutex_unlock(&console_mutex);
@@ -48,18 +48,19 @@ void *run_shell(void *arg)
     return NULL;
 }
 
-int showMenu()
+int show_menu()
 {
     char buffer[100];
 
-    printf("\nDigite: \n1 - Enviar pacote.\n2 - Exibir status. \n3 - Mostrar vizinhos. \n4 - Configurar roteador.\n0 - Sair.\n\n");
-    printf("router %d -> ", routerId);
+    printf("\nDigite: \n1 - Enviar pacote.\n2 - Exibir status. \n3 - Mostrar vizinhos. \n4 - Configurar roteador.\n0 - "
+           "Sair.\n\n");
+    printf("router %d -> ", router_id);
     scanf("%s", buffer);
 
     return atoi(buffer);
 }
 
-void exitRouter()
+void exit_router()
 {
     pthread_cancel(thread_receiver);
     pthread_cancel(thread_sender);
@@ -68,23 +69,23 @@ void exitRouter()
     printf("Encerrando...\n");
 }
 
-void printStatus()
+void print_status()
 {
     printf("\n--- Status do Roteador ---\n");
-    printf("ID: %d\n", routerId);
+    printf("ID: %d\n", router_id);
     printf("IP: %s\n", server);
     printf("Porta: %d\n", port);
     printf("--------------------------\n\n");
 }
 
-void sendPackage()
+void send_package()
 {
-    char type[10], sendTo[100], payload[140];
+    char type[10], send_to[100], payload[140];
 
     printf("\nDigite o numero do roteador que deseja enviar o pacote:\n");
     for (int i = 0; i < QTY_ROUTERS; i++)
     {
-        if (neighbors[i].id != routerId && neighbors[i].id != -1)
+        if (neighbors[i].id != router_id && neighbors[i].id != -1)
         {
             printf("%d - %s:%d ", neighbors[i].id, neighbors[i].ip, neighbors[i].port);
             if (neighbors[i].cost == -1)
@@ -95,24 +96,24 @@ void sendPackage()
         }
     }
     printf("\n->");
-    scanf(" %99s", sendTo);
+    scanf(" %99s", send_to);
 
-    int sendToId = atoi(sendTo);
+    int send_to_id = atoi(send_to);
 
-    if ((sendToId <= 0 || sendToId == routerId || sendToId > QTY_ROUTERS))
+    if ((send_to_id <= 0 || send_to_id == router_id || send_to_id > QTY_ROUTERS))
     {
         printf("Roteador inválido!\n\n");
         return;
     }
 
-    Router sendToRouter = neighbors[sendToId - 1];
+    Router send_to_router = neighbors[send_to_id - 1];
 
-    if (sendToRouter.id == -1)
+    if (send_to_router.id == -1)
     {
         printf("Roteador não encontrado!\n\n");
         return;
     }
-    else if (sendToRouter.cost == -1)
+    else if (send_to_router.cost == -1)
     {
         printf("Este roteador não é um vizinho!\n\n");
         return;
@@ -135,58 +136,60 @@ void sendPackage()
     Package package;
 
     package.type = atoi(type);
-    package.sender = routerId;
-    package.receiver = sendToId;
+    package.sender = router_id;
+    package.receiver = send_to_id;
     strcpy(package.payload, payload);
 
-    addToOutboundQueue(package);
+    add_to_outbound_queue(package);
 
     usleep(1000);
 }
 
-void showNeighbors()
+void show_neighbors()
 {
     for (int i = 0; i < QTY_ROUTERS; i++)
     {
-        if (neighbors[i].id != routerId && neighbors[i].id != -1 && neighbors[i].cost != -1)
+        if (neighbors[i].id != router_id && neighbors[i].id != -1 && neighbors[i].cost != -1)
         {
-            printf("Vizinho: %d - %s:%d, custo: %d\n", neighbors[i].id, neighbors[i].ip, neighbors[i].port, neighbors[i].cost);
+            printf("Vizinho: %d - %s:%d, custo: %d\n", neighbors[i].id, neighbors[i].ip, neighbors[i].port,
+                   neighbors[i].cost);
         }
     }
     printf("\n----------------------\n");
 }
 
-void configurateDistance()
+void configurate_distance()
 {
     char buffer[100];
     printf("Digite o numero do roteador que deseja configurar a distancia:\n");
     for (int i = 0; i < QTY_ROUTERS; i++)
     {
-        if (neighbors[i].id != routerId && neighbors[i].id != -1)
+        if (neighbors[i].id != router_id && neighbors[i].id != -1)
         {
-            printf("%d - %s:%d, custo: %d \n", neighbors[i].id, neighbors[i].ip, neighbors[i].port, neighbors[i].cost == -1 ? 0 : neighbors[i].cost);
+            printf("%d - %s:%d, custo: %d \n", neighbors[i].id, neighbors[i].ip, neighbors[i].port,
+                   neighbors[i].cost == -1 ? 0 : neighbors[i].cost);
         }
     }
 
     printf("\n->");
     scanf(" %99s", buffer);
 
-    int neighborId = atoi(buffer);
+    int neighbor_id = atoi(buffer);
 
-    if ((neighborId <= 0 || neighborId == routerId || neighborId > QTY_ROUTERS))
+    if ((neighbor_id <= 0 || neighbor_id == router_id || neighbor_id > QTY_ROUTERS))
     {
         printf("Roteador inválido!\n\n");
         return;
     }
 
-    Router sendToRouter = neighbors[neighborId - 1];
+    Router send_to_router = neighbors[neighbor_id - 1];
 
-    if (sendToRouter.id == -1)
+    if (send_to_router.id == -1)
     {
         printf("Roteador não encontrado!\n\n");
         return;
     }
-    else if (sendToRouter.cost == -1)
+    else if (send_to_router.cost == -1)
     {
         printf("Este roteador não é um vizinho!\n\n");
         return;
@@ -204,14 +207,14 @@ void configurateDistance()
         return;
     }
 
-    neighbors[neighborId - 1].cost = cost;
+    neighbors[neighbor_id - 1].cost = cost;
 
-    Package sendToRouterPackage;
+    Package send_to_router_package;
 
-    sendNeighborsToControlPackage();
+    send_neighbors_to_control_package();
 }
 
-void configurateTime()
+void configurate_time()
 {
     char buffer[100];
     printf("Tempo de envio de pacotes de controle(em segundos): ");
@@ -224,7 +227,7 @@ void configurateTime()
         return;
     }
 
-    timeToControlPackage = atoi(buffer);
+    time_to_control_package = atoi(buffer);
 }
 
 void configuration()
@@ -239,11 +242,11 @@ void configuration()
 
     if (atoi(buffer) == 1)
     {
-        configurateDistance();
+        configurate_distance();
     }
     else if (atoi(buffer) == 2)
     {
-        configurateTime();
+        configurate_time();
     }
     else
     {

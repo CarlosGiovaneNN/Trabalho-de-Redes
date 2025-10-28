@@ -1,49 +1,49 @@
-#include "services/common.h"
 #include "helper.h"
+#include "services/common.h"
 #include <stdio.h>
 
 // funcao generica de adicionar mensagem a uma fila
-void addToboundQueue(Queue *queue, Package newMessage)
+void add_to_queue(Queue *queue, Package new_message)
 {
     sem_wait(&queue->empty);
 
     pthread_mutex_lock(&(queue->mutex));
-    queue->queue[queue->last] = newMessage;
+    queue->queue[queue->last] = new_message;
     queue->last = (queue->last + 1) % QTY_ROUTERS;
     pthread_mutex_unlock(&(queue->mutex));
 
-    sem_post(&queue->hasData);
+    sem_post(&queue->has_data);
 }
 
-void addToOutboundQueue(Package newMessage)
+void add_to_outbound_queue(Package new_message)
 {
-    addToboundQueue(&outbound, newMessage);
+    add_to_queue(&outbound, new_message);
 }
 
-void addToInboundQueue(Package newMessage)
+void add_to_inbound_queue(Package new_message)
 {
-    addToboundQueue(&inbound, newMessage);
+    add_to_queue(&inbound, new_message);
 }
 
 // funcao generica de remover mensagem de uma fila
-void removeFromQueue(Queue *queue)
+void remove_from_queue(Queue *queue)
 {
     memset(&queue->queue[queue->first], 0, sizeof(Package));
     queue->first = (queue->first + 1) % QTY_ROUTERS;
 }
 
-void removeFromInboundQueue()
+void remove_from_inbound_queue()
 {
-    removeFromQueue(&inbound);
+    remove_from_queue(&inbound);
 }
 
-void removeFromOutboundQueue()
+void remove_from_outbound_queue()
 {
-    removeFromQueue(&outbound);
+    remove_from_queue(&outbound);
 }
 
 // funcao generica de imprimir uma fila
-void printQueue(Queue *queue)
+void print_queue(Queue *queue)
 {
     printf("\n\n----------------------\n");
     printf("\nFila de %s: \n", queue == &inbound ? "entrada" : "saida");
@@ -63,85 +63,85 @@ void printQueue(Queue *queue)
 }
 
 // funcao de limpar os roteadores
-void clearRouters()
+void clear_routers()
 {
     for (int i = 0; i < QTY_ROUTERS; i++)
     {
-        if (routerId - 1 != i)
+        if (router_id - 1 != i)
         {
             neighbors[i].id = -1;
             neighbors[i].cost = -1;
         }
         else
         {
-            neighbors[i].id = routerId;
+            neighbors[i].id = router_id;
             neighbors[i].cost = 0;
         }
     }
 }
 
 // funcao de leitura dos arquivos de configuracao
-int readConfigs()
+int read_configs()
 {
     printf("Configurando o roteador....\n");
     FILE *arquivo;
-    int numberLine = 1;
+    int number_line = 1;
     char line[50];
-    clearRouters();
+    clear_routers();
 
     // iniciando a leitura do arquivo de enlaces.config
-    arquivo = fopen(pathConfigEnlaces, "r");
+    arquivo = fopen(PATH_CONFIG_ENLACES, "r");
     if (arquivo == NULL)
     {
-        printf("Erro ao abrir o arquivo %s\n", pathConfigEnlaces);
+        printf("Erro ao abrir o arquivo %s\n", PATH_CONFIG_ENLACES);
         return 1;
     }
 
     while (fgets(line, sizeof(line), arquivo) != NULL)
     {
         int router1, router2, cost;
-        int qtyValues = sscanf(line, "%d %d %d", &router1, &router2, &cost);
+        int qty_values = sscanf(line, "%d %d %d", &router1, &router2, &cost);
 
-        if (qtyValues == 3)
+        if (qty_values == 3)
         {
-            if (router1 == routerId)
+            if (router1 == router_id)
             {
                 neighbors[router2 - 1].cost = cost;
             }
-            else if (router2 == routerId)
+            else if (router2 == router_id)
             {
                 neighbors[router1 - 1].cost = cost;
             }
         }
         else
         {
-            printf("Caminhos: Linha %d mal formatada ou vazia. Ignorando-a.\n", numberLine);
+            printf("Caminhos: Linha %d mal formatada ou vazia. Ignorando-a.\n", number_line);
         }
 
-        numberLine++;
+        number_line++;
     }
 
     fclose(arquivo);
 
     // iniciando a leitura do arquivo roteador.config
-    arquivo = fopen(pathConfigRoteador, "r");
+    arquivo = fopen(PATH_CONFIG_ROTERS, "r");
     if (arquivo == NULL)
     {
-        printf("Erro ao abrir o arquivo %s\n", pathConfigRoteador);
+        printf("Erro ao abrir o arquivo %s\n", PATH_CONFIG_ROTERS);
         return 1;
     }
 
-    numberLine = 1;
+    number_line = 1;
 
     while (fgets(line, sizeof(line), arquivo) != NULL)
     {
         int router, PORT;
         char ip[20];
-        int qtyValues = sscanf(line, "%d %d %19s", &router, &PORT, ip);
+        int qty_values = sscanf(line, "%d %d %19s", &router, &PORT, ip);
 
-        if (qtyValues == 3)
+        if (qty_values == 3)
         {
-            if (router == routerId)
+            if (router == router_id)
             {
                 port = PORT;
                 strcpy(server, ip);
@@ -154,10 +154,10 @@ int readConfigs()
         }
         else
         {
-            printf("Roteadores: Linha %d mal formatada ou vazia. Ignorando-a.\n", numberLine);
+            printf("Roteadores: Linha %d mal formatada ou vazia. Ignorando-a.\n", number_line);
         }
 
-        numberLine++;
+        number_line++;
     }
 
     fclose(arquivo);
@@ -174,18 +174,18 @@ void die(const char *s)
     exit(1);
 }
 
-void sendNeighborsToControlPackage()
+void send_neighbors_to_control_package()
 {
-    char messagePayload[PAYLOAD_SIZE] = "";
+    char message_payload[PAYLOAD_SIZE] = "";
 
     for (int i = 0; i < QTY_ROUTERS; i++)
     {
         char buffer[100];
-        sprintf(buffer, "%d:%d;", routingTable[i].destination, routingTable[i].cost);
+        sprintf(buffer, "%d:%d;", routing_table[i].destination, routing_table[i].cost);
 
-        if (strlen(messagePayload) + strlen(buffer) < PAYLOAD_SIZE)
+        if (strlen(message_payload) + strlen(buffer) < PAYLOAD_SIZE)
         {
-            strcat(messagePayload, buffer);
+            strcat(message_payload, buffer);
         }
         else
         {
@@ -196,17 +196,17 @@ void sendNeighborsToControlPackage()
 
     for (int i = 0; i < QTY_ROUTERS; i++)
     {
-        if (neighbors[i].id != routerId && neighbors[i].cost != -1 && neighbors[i].id != -1)
+        if (neighbors[i].id != router_id && neighbors[i].cost != -1 && neighbors[i].id != -1)
         {
             Package pkg;
 
             pkg.type = CONTROL;
-            pkg.sender = routerId;
+            pkg.sender = router_id;
             pkg.receiver = neighbors[i].id;
 
-            strcpy(pkg.payload, messagePayload);
+            strcpy(pkg.payload, message_payload);
 
-            addToOutboundQueue(pkg);
+            add_to_outbound_queue(pkg);
         }
     }
 }
@@ -216,71 +216,82 @@ Inicializa a tabela de roteamento para cada destino possível
 com custo -1 e proximo roteador -1, depois atualiza com o valor conhecido de seus vizinhos
 Já o vetor recebido inicializa tudo com -1, menos o do proprio roteador
 */
-void initializeRoutingTables() {
+void initialize_routing_tables()
+{
 
-    for (int i = 0; i < QTY_ROUTERS; i++) {
-        routingTable[i].destination = i+1;
-        routingTable[i].cost = -1;
-        routingTable[i].nextRouter = -1;
+    for (int i = 0; i < QTY_ROUTERS; i++)
+    {
+        routing_table[i].destination = i + 1;
+        routing_table[i].cost = -1;
+        routing_table[i].next_router = -1;
     }
 
-    routingTable[routerId - 1].cost = 0;
-    routingTable[routerId - 1].nextRouter = routerId;
+    routing_table[router_id - 1].cost = 0;
+    routing_table[router_id - 1].next_router = router_id;
 
-    for (int i = 0; i < QTY_ROUTERS; i++) {
-        if (neighbors[i].cost > 0) {
+    for (int i = 0; i < QTY_ROUTERS; i++)
+    {
+        if (neighbors[i].cost > 0)
+        {
 
-            routingTable[i].cost = neighbors[i].cost;
-            routingTable[i].nextRouter = i+1;
+            routing_table[i].cost = neighbors[i].cost;
+            routing_table[i].next_router = i + 1;
         }
     }
-    
-   for (int i = 0; i < QTY_ROUTERS; i++) {
-        for (int j = 0; j < QTY_ROUTERS; j++) {
-            lastVectors[i][j] = -1;
+
+    for (int i = 0; i < QTY_ROUTERS; i++)
+    {
+        for (int j = 0; j < QTY_ROUTERS; j++)
+        {
+            last_vectors[i][j] = -1;
         }
     }
 
-    for (int i = 0; i < QTY_ROUTERS; i++) {
-        lastVectors[routerId - 1][i] = routingTable[i].cost;
+    for (int i = 0; i < QTY_ROUTERS; i++)
+    {
+        last_vectors[router_id - 1][i] = routing_table[i].cost;
     }
 }
 
 /**
  * @todo
  */
-void updateRoutingTable(){
-    int changeTable = 0;
+void update_routing_table()
+{
+    int change_table = 0;
 
     for (int i = 0; i < QTY_ROUTERS; i++)
     {
-        if(i == routerId - 1){
+        if (i == router_id - 1)
+        {
             continue;
         }
 
         for (int j = 0; j < QTY_ROUTERS; j++)
         {
-            int lowerCost = routingTable[j].cost;
-            int currentCost = -1;
-            if(lastVectors[i][j] > 0 && neighbors[i].cost > 0){
-                currentCost = lastVectors[i][j] + neighbors[i].cost;
+            int lower_cost = routing_table[j].cost;
+            int current_cost = -1;
+            if (last_vectors[i][j] > 0 && neighbors[i].cost > 0)
+            {
+                current_cost = last_vectors[i][j] + neighbors[i].cost;
             }
 
-            if((currentCost < lowerCost || lowerCost == -1) && currentCost != 1){
-                changeTable = 1;
-                routingTable[j].cost = currentCost;
+            if ((current_cost < lower_cost || lower_cost == -1) && current_cost != 1)
+            {
+                change_table = 1;
+                routing_table[j].cost = current_cost;
             }
         }
     }
 
-    if(changeTable){
-        //Aqui mudou a tabela tem q mandar o vetor de novo pros vizinhos
+    if (change_table)
+    {
+        // Aqui mudou a tabela tem q mandar o vetor de novo pros vizinhos
     }
-    
 }
 
 /**
- * Peguei do gpt pq queria ver como tinha ficado as tabelas, depois da pra apagar 
+ * Peguei do gpt pq queria ver como tinha ficado as tabelas, depois da pra apagar
  * @brief Imprime a tabela de roteamento atual e a matriz de vetores de distância
  * recebidos de forma formatada e segura para threads.
  */
@@ -290,7 +301,7 @@ void print_tables()
     pthread_mutex_lock(&console_mutex);
 
     printf("\n\n############################################################\n");
-    printf("###               VISUALIZACAO DAS TABELAS (Roteador %d)    ###\n", routerId);
+    printf("###               VISUALIZACAO DAS TABELAS (Roteador %d)    ###\n", router_id);
     printf("############################################################\n\n");
 
     // --- Imprimindo a Tabela de Roteamento Principal ---
@@ -301,42 +312,50 @@ void print_tables()
 
     for (int i = 0; i < QTY_ROUTERS; i++)
     {
-        printf("|      %2d     |", routingTable[i].destination);
+        printf("|      %2d     |", routing_table[i].destination);
 
         // Imprime o custo de forma amigável (mostra 'inf' para infinito)
-        if (routingTable[i].cost == -1) {
+        if (routing_table[i].cost == -1)
+        {
             printf("   inf   |");
-        } else {
-            printf("   %3d   |", routingTable[i].cost);
+        }
+        else
+        {
+            printf("   %3d   |", routing_table[i].cost);
         }
 
         // Imprime o próximo salto (mostra '-' para indefinido)
-        if (routingTable[i].nextRouter == -1) {
+        if (routing_table[i].next_router == -1)
+        {
             printf("       -       |");
-        } else {
-            printf("      %2d       |", routingTable[i].nextRouter);
+        }
+        else
+        {
+            printf("      %2d       |", routing_table[i].next_router);
         }
 
         // Adiciona um comentário para a rota até si mesmo
-        if (routingTable[i].destination == routerId) {
+        if (routing_table[i].destination == router_id)
+        {
             printf(" <- (Este roteador)");
         }
         printf("\n");
     }
     printf("+-------------+---------+---------------+\n\n\n");
 
-
     // --- Imprimindo a Matriz de Vetores Recebidos ---
-    printf("=== Matriz de Vetores de Distancia Recebidos (lastVectors) ===\n");
+    printf("=== Matriz de Vetores de Distancia Recebidos (last_vectors) ===\n");
     printf("         (Visao de Custo para cada Destino Dst)\n");
 
     // Cabeçalho da matriz (Destinos)
     printf("De \\ Dst |");
-    for (int j = 0; j < QTY_ROUTERS; j++) {
+    for (int j = 0; j < QTY_ROUTERS; j++)
+    {
         printf("  %2d  |", j + 1);
     }
     printf("\n---------+");
-    for (int j = 0; j < QTY_ROUTERS; j++) {
+    for (int j = 0; j < QTY_ROUTERS; j++)
+    {
         printf("------+");
     }
     printf("\n");
@@ -345,26 +364,30 @@ void print_tables()
     for (int i = 0; i < QTY_ROUTERS; i++)
     {
         // Só imprime a linha se for um vizinho ou o próprio roteador
-        if (neighbors[i].cost != -1) {
+        if (neighbors[i].cost != -1)
+        {
             printf(" Rota %2d |", neighbors[i].id); // Cabeçalho da linha (Quem enviou o vetor)
             for (int j = 0; j < QTY_ROUTERS; j++)
             {
                 // Imprime o custo que o roteador 'i+1' anunciou para o destino 'j+1'
-                int cost = lastVectors[i][j];
-                if (cost == -1) {
+                int cost = last_vectors[i][j];
+                if (cost == -1)
+                {
                     printf("  inf |");
-                } else {
+                }
+                else
+                {
                     printf("  %3d |", cost);
                 }
             }
-            if (neighbors[i].id == routerId) {
+            if (neighbors[i].id == router_id)
+            {
                 printf(" <- (Meu proprio vetor)");
             }
             printf("\n");
         }
     }
     printf("------------------------------------------------------------------------\n\n");
-
 
     // Libera o mutex do console
     pthread_mutex_unlock(&console_mutex);

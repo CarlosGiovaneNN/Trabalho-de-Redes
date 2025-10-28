@@ -1,21 +1,21 @@
 #ifndef HELPER_H
 #define HELPER_H
 
-void addToInboundQueue(Package newMessage);
-void addToOutboundQueue(Package newMessage);
+void add_to_inbound_queue(Package new_message);
+void add_to_outbound_queue(Package new_message);
 
-void removeFromInboundQueue();
-void removeFromOutboundQueue();
+void remove_from_inbound_queue();
+void remove_from_outbound_queue();
 
-void printQueue(Queue *queue);
+void print_queue(Queue *queue);
 
-int readConfigs();
-void initializeRoutingTables();
-void updateRoutingTable();
+int read_configs();
+void initialize_routing_tables();
+void update_routing_table();
 void print_tables();
 
 void die(const char *s);
 
-void sendNeighborsToControlPackage();
+void send_neighbors_to_control_package();
 
 #endif
