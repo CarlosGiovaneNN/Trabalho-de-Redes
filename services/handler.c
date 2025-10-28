@@ -49,6 +49,15 @@ void control_message_handler(Package package)
     char temp[PAYLOAD_SIZE];
     strcpy(temp, package.payload);
 
+    pthread_mutex_lock(&routers_mutex);
+
+    time_t now;
+    time(&now);
+
+    neighbors[origem - 1].last_time_seen = now;
+
+    pthread_mutex_unlock(&routers_mutex);
+
     char *token = strtok(temp, ";");
     while (token != NULL)
     {

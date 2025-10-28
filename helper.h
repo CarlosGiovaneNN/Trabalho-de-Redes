@@ -1,6 +1,8 @@
 #ifndef HELPER_H
 #define HELPER_H
 
+#include "services/common.h"
+
 void add_to_inbound_queue(Package new_message);
 void add_to_outbound_queue(Package new_message);
 

@@ -1,6 +1,4 @@
-#include "helper.h"
 #include "services/common.h"
-#include <stdio.h>
 
 // funcao generica de adicionar mensagem a uma fila
 void add_to_queue(Queue *queue, Package new_message)
@@ -71,11 +69,13 @@ void clear_routers()
         {
             neighbors[i].id = -1;
             neighbors[i].cost = -1;
+            neighbors[i].last_time_seen = 0;
         }
         else
         {
             neighbors[i].id = router_id;
             neighbors[i].cost = 0;
+            neighbors[i].last_time_seen = 0;
         }
     }
 }
@@ -151,6 +151,7 @@ int read_configs()
             neighbors[router - 1].id = router;
             strcpy(neighbors[router - 1].ip, ip);
             neighbors[router - 1].port = PORT;
+            neighbors[router - 1].last_time_seen = 0;
         }
         else
         {
@@ -258,11 +259,13 @@ void initialize_routing_tables()
  */
 void update_routing_table()
 {
+    pthread_mutex_lock(&routers_mutex);
+
     int change_table = 0;
 
     for (int i = 0; i < QTY_ROUTERS; i++)
     {
-        if (i == router_id - 1)
+        if (i == router_id - 1 || neighbors[i].cost == -1)
         {
             continue;
         }
@@ -283,6 +286,8 @@ void update_routing_table()
             }
         }
     }
+
+    pthread_mutex_unlock(&routers_mutex);
 
     if (change_table)
     {

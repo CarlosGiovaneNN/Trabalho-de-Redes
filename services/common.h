@@ -9,6 +9,7 @@
 #include <string.h>
 #include <sys/socket.h> //utilização dos sockets de conexão a rede (Linux)
 #include <unistd.h>
+#include <time.h>
 
 #include "cron.h"
 #include "handler.h"
@@ -50,6 +51,7 @@ typedef struct
     char ip[50];
     int port;
     int cost;
+    time_t last_time_seen;
 } Router;
 
 typedef struct
@@ -69,6 +71,6 @@ extern int port;
 extern int time_to_control_package;
 extern pthread_t thread_receiver, thread_sender, thread_handler, thread_shell;
 extern Router neighbors[QTY_ROUTERS];
-extern pthread_mutex_t console_mutex;
+extern pthread_mutex_t console_mutex, routers_mutex;
 
 #endif
