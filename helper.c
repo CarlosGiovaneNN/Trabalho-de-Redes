@@ -246,6 +246,38 @@ void initializeRoutingTables() {
     }
 }
 
+/**
+ * @todo
+ */
+void updateRoutingTable(){
+    int changeTable = 0;
+
+    for (int i = 0; i < QTY_ROUTERS; i++)
+    {
+        if(i == routerId - 1){
+            continue;
+        }
+
+        for (int j = 0; j < QTY_ROUTERS; j++)
+        {
+            int lowerCost = routingTable[j].cost;
+            int currentCost = -1;
+            if(lastVectors[i][j] > 0 && neighbors[i].cost > 0){
+                currentCost = lastVectors[i][j] + neighbors[i].cost;
+            }
+
+            if((currentCost < lowerCost || lowerCost == -1) && currentCost != 1){
+                changeTable = 1;
+                routingTable[j].cost = currentCost;
+            }
+        }
+    }
+
+    if(changeTable){
+        //Aqui mudou a tabela tem q mandar o vetor de novo pros vizinhos
+    }
+    
+}
 
 /**
  * Peguei do gpt pq queria ver como tinha ficado as tabelas, depois da pra apagar 

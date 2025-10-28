@@ -81,14 +81,6 @@ void sendPackage()
 {
     char type[10], sendTo[100], payload[140];
 
-<<<<<<< HEAD
-    printf("Digite o numero do roteador que deseja enviar o pacote:\n");
-    for (int i = 0; i < QTY_ROUTERS; i++) {
-        if (neighbors[i].id != routerId && neighbors[i].id != -1) {
-            printf("%d - %s:%d", neighbors[i].id, neighbors[i].ip, neighbors[i].port);
-            if(neighbors[i].cost == -1){
-                printf(" (Indisponivel) ");
-=======
     printf("\nDigite o numero do roteador que deseja enviar o pacote:\n");
     for (int i = 0; i < QTY_ROUTERS; i++)
     {
@@ -98,7 +90,6 @@ void sendPackage()
             if (neighbors[i].cost == -1)
             {
                 printf("(Indisponivel) ");
->>>>>>> 0a6444c37c964250b25e99d8018d82a32c35693b
             }
             printf("\n");
         }

@@ -11,6 +11,7 @@ void printQueue(Queue *queue);
 
 int readConfigs();
 void initializeRoutingTables();
+void updateRoutingTable();
 void print_tables();
 
 void die(const char *s);

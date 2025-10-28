@@ -37,7 +37,7 @@ int main(int argc, char const *argv[])
     readConfigs();
     // Inicializando a tabela de roteamento e a matriz dos vetores recebidos
     initializeRoutingTables();
-    // print_tables(); //Pra mostrar como ficou as tabelas de roteamento e os ultimos vetores recebidos
+    print_tables(); //Pra mostrar como ficou as tabelas de roteamento e os ultimos vetores recebidos
 
     // GPT me falou que tem que ser assim um mutex recursivo
     pthread_mutexattr_t attr;

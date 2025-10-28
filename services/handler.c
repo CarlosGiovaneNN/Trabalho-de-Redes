@@ -62,7 +62,8 @@ void controlMessageHandler(Package package)
         token = strtok(NULL, ";");
     }
 
-    dataMessageHandler(package);
+    updateRoutingTable(); //atualiza a routing table
+    dataMessageHandler(package); //mostra a mensagem de controle recebida
 }
 
 void dataMessageHandler(Package package)
