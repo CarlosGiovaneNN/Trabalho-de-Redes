@@ -79,6 +79,9 @@ void print_queue(Queue *queue)
 // funcao de limpar os roteadores
 void clear_routers()
 {
+
+    pthread_mutex_lock(&routers_mutex);
+
     for (int i = 0; i < QTY_ROUTERS; i++)
     {
         if (router_id - 1 != i)
@@ -96,11 +99,16 @@ void clear_routers()
             neighbors[i].last_time_seen = 0;
         }
     }
+
+    pthread_mutex_unlock(&routers_mutex);
 }
 
 // funcao de leitura dos arquivos de configuracao
 int read_configs()
 {
+
+    pthread_mutex_lock(&routers_mutex);
+
     printf("Configurando o roteador....\n");
     FILE *arquivo;
     int number_line = 1;
@@ -112,6 +120,9 @@ int read_configs()
     if (arquivo == NULL)
     {
         printf("Erro ao abrir o arquivo %s\n", PATH_CONFIG_ENLACES);
+
+        pthread_mutex_unlock(&routers_mutex);
+
         return 1;
     }
 
@@ -148,6 +159,9 @@ int read_configs()
     if (arquivo == NULL)
     {
         printf("Erro ao abrir o arquivo %s\n", PATH_CONFIG_ROTERS);
+
+        pthread_mutex_unlock(&routers_mutex);
+
         return 1;
     }
 
@@ -185,6 +199,9 @@ int read_configs()
 
     printf("Configurado com sucesso\n");
     printf("--------------------------\n");
+
+    pthread_mutex_unlock(&routers_mutex);
+
     return 0;
 }
 
@@ -243,6 +260,7 @@ Já o vetor recebido inicializa tudo com -1, menos o do proprio roteador
 */
 void initialize_routing_tables()
 {
+    pthread_mutex_lock(&routers_mutex);
 
     for (int i = 0; i < QTY_ROUTERS; i++)
     {
@@ -276,6 +294,8 @@ void initialize_routing_tables()
     {
         last_vectors[router_id - 1][i] = routing_table[i].cost;
     }
+
+    pthread_mutex_unlock(&routers_mutex);
 }
 
 /**
@@ -301,8 +321,13 @@ void update_routing_table()
             continue;
         }
 
-        int new_best_cost = -1;
-        int new_next_hop = -1;
+        int new_best_cost = neighbors[i].cost;
+        int new_next_hop = i + 1;
+
+        if (new_best_cost == -1)
+        {
+            new_next_hop = -1;
+        }
 
         for (int j = 0; j < QTY_ROUTERS; j++)
         {

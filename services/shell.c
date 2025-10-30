@@ -238,11 +238,32 @@ void configurate_time()
     time_to_control_package = atoi(buffer);
 }
 
+void configurate_control_package_view()
+{
+    char buffer[100];
+    printf("Visualizar pacotes de controle: ");
+    printf("\n1 - Sim\n0 - Nao\n");
+    printf("\n->");
+    scanf(" %99s", buffer);
+
+    if (atoi(buffer) == 1)
+    {
+        show_control_package = 1;
+    }
+    else
+    {
+        show_control_package = 0;
+    }
+
+    printf("\nConfiguracoes salvas!\n\n");
+}
+
 void configuration()
 {
     printf("Digite o numero da configuracao: \n");
     printf("1 - Configurar distancias dos roteadores\n");
     printf("2 - Configurar tempo de envio de pacotes de controle\n");
+    printf("3 - Configurar vizualizacao de pacotes de controle\n");
 
     char buffer[100];
     printf("\n->");
@@ -255,6 +276,10 @@ void configuration()
     else if (atoi(buffer) == 2)
     {
         configurate_time();
+    }
+    else if (atoi(buffer) == 3)
+    {
+        configurate_control_package_view();
     }
     else
     {

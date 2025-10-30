@@ -5,6 +5,7 @@ Queue inbound;  // Fila de entrada
 Queue outbound; // Fila de saida
 int router_id = -1;
 char server[50];
+int show_control_package = 0;
 int port = 0;
 int time_to_control_package = 10;
 pthread_t thread_receiver, thread_sender, thread_handler, thread_shell, thread_router_controller;
@@ -34,13 +35,6 @@ int main(int argc, char const *argv[])
         }
     }
 
-    // Configurando o roteador e seus vizinhos
-    read_configs();
-    // Inicializando a tabela de roteamento e a matriz dos vetores recebidos
-    initialize_routing_tables();
-    print_tables(); // Pra mostrar como ficou as tabelas de roteamento e os ultimos vetores recebidos
-
-    // GPT me falou que tem que ser assim um mutex recursivo
     pthread_mutexattr_t attr;
     pthread_mutexattr_init(&attr);
     pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE_NP);
@@ -60,6 +54,12 @@ int main(int argc, char const *argv[])
 
     sem_init(&inbound.has_data, 0, 0);
     sem_init(&inbound.empty, 0, QTY_ROUTERS);
+
+    // Configurando o roteador e seus vizinhos
+    read_configs();
+    // Inicializando a tabela de roteamento e a matriz dos vetores recebidos
+    initialize_routing_tables();
+    print_tables(); // Pra mostrar como ficou as tabelas de roteamento e os ultimos vetores recebidos
 
     // cria as e inicia as threads
     if (pthread_create(&thread_receiver, NULL, &run_receiver, NULL) != 0)

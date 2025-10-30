@@ -24,7 +24,9 @@ void *run_sender(void *arg)
 
         // envia o pacote
         send_package_to_router(package_to_send);
-        printf(package_to_send.type == CONTROL ? "" : "\n---------------\nPacote enviado!\n---------------\n");
+        printf(package_to_send.type == CONTROL || package_to_send.sender != router_id
+                   ? ""
+                   : "\n---------------\nPacote enviado!\n---------------\n");
 
         usleep(1000);
     }
@@ -48,7 +50,7 @@ void send_package_to_router(Package package)
     {
         pthread_mutex_unlock(&routers_mutex);
 
-        printf("\nDestino indisponivel!\n");
+        printf("\nDestino %d indisponivel!\n", final_destination_id);
 
         return;
     }

@@ -21,12 +21,12 @@ void *run_router_controller(void *arg)
 
 void calculate_timeout()
 {
-    pthread_mutex_lock(&routers_mutex);
-
     int table_changed = 0;
 
     time_t now;
     time(&now);
+
+    pthread_mutex_lock(&routers_mutex);
 
     for (int i = 0; i < QTY_ROUTERS; i++)
     {

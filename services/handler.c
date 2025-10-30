@@ -80,7 +80,7 @@ void data_message_handler(Package package)
     {
         pthread_mutex_lock(&console_mutex);
 
-        if (package.type == DATA)
+        if (package.type == DATA || show_control_package == 1)
         {
             printf("\n---------------\nPacote recebido!\n\n");
             printf("Tipo: %s\n", package.type == CONTROL ? "Control" : "Data");
@@ -100,7 +100,7 @@ void data_message_handler(Package package)
         if (package.type == DATA)
         {
             printf("\n--------------------------------\n");
-            printf("Enviando pacote de %d para %d", package.sender, package.receiver);
+            printf("Enviando pacote do %d para %d", package.sender, package.receiver);
             printf("\n--------------------------------\n");
         }
 

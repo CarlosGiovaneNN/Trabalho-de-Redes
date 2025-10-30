@@ -69,6 +69,7 @@ extern RoutingTableEntry routing_table[QTY_ROUTERS];
 extern int last_vectors[QTY_ROUTERS][QTY_ROUTERS];
 extern int router_id;
 extern char server[50];
+extern int show_control_package;
 extern int port;
 extern int time_to_control_package;
 extern pthread_t thread_receiver, thread_sender, thread_handler, thread_shell, thread_router_controller;
