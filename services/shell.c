@@ -24,6 +24,10 @@ void *run_shell(void *arg)
             pthread_mutex_unlock(&console_mutex);
             break;
         }
+        else if (buffer == 5)
+        {
+            print_tables();
+        }
         else if (buffer == 4)
         {
             configuration();
@@ -52,8 +56,15 @@ int show_menu()
 {
     char buffer[100];
 
-    printf("\nDigite: \n1 - Enviar pacote.\n2 - Exibir status. \n3 - Mostrar vizinhos. \n4 - Configurar roteador.\n0 - "
-           "Sair.\n\n");
+    printf("\nDigite:\n");
+
+    printf("1 - Enviar pacote.\n");
+    printf("2 - Exibir status.\n");
+    printf("3 - Mostrar vizinhos.\n");
+    printf("4 - Configurar roteador.\n");
+    printf("5 - Exibir tabela de roteamento.\n");
+
+    printf("0 - Sair.\n\n");
     printf("router %d -> ", router_id);
     scanf("%s", buffer);
 
@@ -65,6 +76,7 @@ void exit_router()
     pthread_cancel(thread_receiver);
     pthread_cancel(thread_sender);
     pthread_cancel(thread_handler);
+    pthread_cancel(thread_cron);
 
     printf("Encerrando...\n");
 }
@@ -189,11 +201,6 @@ void configurate_distance()
         printf("Roteador não encontrado!\n\n");
         return;
     }
-    else if (send_to_router.cost == -1)
-    {
-        printf("Este roteador não é um vizinho!\n\n");
-        return;
-    }
 
     printf("\nDigite o custo da distancia: ");
     printf("\n->");
@@ -208,6 +215,7 @@ void configurate_distance()
     }
 
     neighbors[neighbor_id - 1].cost = cost;
+    routing_table[neighbor_id - 1].cost = cost;
 
     Package send_to_router_package;
 

@@ -7,20 +7,11 @@ void *run_cron(void *arg)
 {
     printf("Cron iniciado.\n");
 
-    int count = 0;
-
     while (1)
     {
         usleep(time_to_control_package * 1000000); // tempo x segundos
 
         calculate_timeout();
-        count++;
-
-        if (count == 5)
-        {
-            print_tables();
-            count = 0;
-        }
 
         send_neighbors_to_control_package();
     }
@@ -39,7 +30,7 @@ void calculate_timeout()
 
     for (int i = 0; i < QTY_ROUTERS; i++)
     {
-        if (neighbors[i].cost != -1 && neighbors[i].last_time_seen != 0)
+        if (neighbors[i].cost != -1 && neighbors[i].id != router_id && neighbors[i].last_time_seen != 0)
         {
             double seconds_elapsed = difftime(now, neighbors[i].last_time_seen);
 

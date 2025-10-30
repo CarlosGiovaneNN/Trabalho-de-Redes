@@ -14,8 +14,6 @@ void *run_handler(void *arg)
 
         pthread_mutex_lock(&inbound.mutex);
 
-        pthread_mutex_lock(&console_mutex);
-
         Package package = inbound.queue[inbound.first];
         remove_from_inbound_queue();
 
@@ -28,8 +26,6 @@ void *run_handler(void *arg)
             data_message_handler(package);
         }
 
-        pthread_mutex_unlock(&console_mutex);
-
         pthread_mutex_unlock(&inbound.mutex);
 
         sem_post(&inbound.empty);
@@ -38,14 +34,12 @@ void *run_handler(void *arg)
     return NULL;
 }
 
-///@todo -> montar uma função para recalcular o roteamento
 /**
  * A função lê o pacote de controle e atualiza a
  * matriz de ultimos vetores salvos
  */
 void control_message_handler(Package package)
 {
-    int origem = package.sender;
     char temp[PAYLOAD_SIZE];
     strcpy(temp, package.payload);
 
@@ -54,7 +48,12 @@ void control_message_handler(Package package)
     time_t now;
     time(&now);
 
-    neighbors[origem - 1].last_time_seen = now;
+    neighbors[package.sender - 1].last_time_seen = now;
+
+    if (neighbors[package.sender - 1].cost == -1)
+    {
+        neighbors[package.sender - 1].cost = neighbors[package.sender - 1].original_cost;
+    }
 
     char *token = strtok(temp, ";");
     while (token != NULL)
@@ -63,7 +62,7 @@ void control_message_handler(Package package)
 
         if (sscanf(token, "%d:%d", &id, &cost) == 2)
         {
-            last_vectors[origem - 1][id - 1] = cost;
+            last_vectors[package.sender - 1][id - 1] = cost;
         }
 
         token = strtok(NULL, ";");
@@ -79,26 +78,34 @@ void data_message_handler(Package package)
 {
     if (package.receiver == router_id)
     {
-        printf("\n---------------\nPacote recebido!\n---------------\n");
-        printf("Tipo: %d\n", package.type);
-        printf("Remetente: %d\n", package.sender);
-        printf("Destinatario: %d\n", package.receiver);
-        printf("Payload: %s\n", package.payload);
-        printf("---------------\n\n");
-    }
-    else
-    {
-        pthread_mutex_lock(&outbound.mutex);
+        pthread_mutex_lock(&console_mutex);
 
         if (package.type == DATA)
         {
-            printf("\n--------------------------------");
+            printf("\n---------------\nPacote recebido!\n\n");
+            printf("Tipo: %s\n", package.type == CONTROL ? "Control" : "Data");
+            printf("Remetente: %d\n", package.sender);
+            printf("Destinatario: %d\n", package.receiver);
+            printf("Payload: %s\n", package.payload);
+            printf("---------------\n\n");
+        }
+
+        pthread_mutex_unlock(&console_mutex);
+    }
+    else
+    {
+
+        pthread_mutex_lock(&console_mutex);
+
+        if (package.type == DATA)
+        {
+            printf("\n--------------------------------\n");
             printf("Enviando pacote de %d para %d", package.sender, package.receiver);
             printf("\n--------------------------------\n");
         }
 
-        add_to_outbound_queue(package);
+        pthread_mutex_unlock(&console_mutex);
 
-        pthread_mutex_unlock(&outbound.mutex);
+        add_to_outbound_queue(package);
     }
 }

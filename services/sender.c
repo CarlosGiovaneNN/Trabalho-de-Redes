@@ -24,7 +24,7 @@ void *run_sender(void *arg)
 
         // envia o pacote
         send_package_to_router(package_to_send);
-        printf(package_to_send.type == CONTROL ? "\n" : "\n---------------\nPacote enviado!\n---------------\n");
+        printf(package_to_send.type == CONTROL ? "" : "\n---------------\nPacote enviado!\n---------------\n");
 
         usleep(1000);
     }

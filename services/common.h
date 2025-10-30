@@ -51,6 +51,7 @@ typedef struct
     char ip[50];
     int port;
     int cost;
+    int original_cost;
     time_t last_time_seen;
 } Router;
 
@@ -69,7 +70,7 @@ extern int router_id;
 extern char server[50];
 extern int port;
 extern int time_to_control_package;
-extern pthread_t thread_receiver, thread_sender, thread_handler, thread_shell;
+extern pthread_t thread_receiver, thread_sender, thread_handler, thread_shell, thread_cron;
 extern Router neighbors[QTY_ROUTERS];
 extern pthread_mutex_t console_mutex, routers_mutex;
 

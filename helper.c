@@ -85,12 +85,14 @@ void clear_routers()
         {
             neighbors[i].id = -1;
             neighbors[i].cost = -1;
+            neighbors[i].original_cost = -1;
             neighbors[i].last_time_seen = 0;
         }
         else
         {
             neighbors[i].id = router_id;
             neighbors[i].cost = 0;
+            neighbors[i].original_cost = 0;
             neighbors[i].last_time_seen = 0;
         }
     }
@@ -123,10 +125,12 @@ int read_configs()
             if (router1 == router_id)
             {
                 neighbors[router2 - 1].cost = cost;
+                neighbors[router2 - 1].original_cost = cost;
             }
             else if (router2 == router_id)
             {
                 neighbors[router1 - 1].cost = cost;
+                neighbors[router1 - 1].original_cost = cost;
             }
         }
         else
@@ -286,21 +290,30 @@ void update_routing_table()
 
     for (int i = 0; i < QTY_ROUTERS; i++)
     {
-        if (i == router_id - 1 || neighbors[i].cost == -1)
+        if (i == router_id - 1)
         {
+            if (routing_table[i].cost != 0)
+            {
+                routing_table[i].cost = 0;
+                routing_table[i].next_router = router_id;
+                change_table = 1;
+            }
             continue;
         }
 
-        int cost_to_neighbor = neighbors[i].cost;
+        int new_best_cost = -1;
+        int new_next_hop = -1;
 
         for (int j = 0; j < QTY_ROUTERS; j++)
         {
-            if (j == router_id - 1)
+
+            if (j == router_id - 1 || neighbors[j].cost == -1)
             {
                 continue;
             }
 
-            int cost_neighbor_to_dest = last_vectors[i][j];
+            int cost_to_neighbor = neighbors[j].cost;
+            int cost_neighbor_to_dest = last_vectors[j][i];
 
             if (cost_neighbor_to_dest == -1)
             {
@@ -308,15 +321,30 @@ void update_routing_table()
             }
 
             int new_path_cost = cost_to_neighbor + cost_neighbor_to_dest;
-            int existing_cost = routing_table[j].cost;
 
-            if (new_path_cost < existing_cost || existing_cost == -1)
+            if (new_path_cost > 100) // aruma aq para n dar overflow
             {
-                change_table = 1;
-                routing_table[j].cost = new_path_cost;
-
-                routing_table[j].next_router = i + 1;
+                new_path_cost = -1;
             }
+
+            if (new_path_cost == -1) // aruma aq para n dar overflow
+            {
+                continue;
+            }
+
+            if (new_path_cost < new_best_cost || new_best_cost == -1)
+            {
+                new_best_cost = new_path_cost;
+                new_next_hop = j + 1;
+            }
+        }
+
+        if (routing_table[i].cost != new_best_cost || routing_table[i].next_router != new_next_hop)
+        {
+            routing_table[i].cost = new_best_cost;
+            routing_table[i].next_router = new_next_hop;
+
+            change_table = 1;
         }
     }
 
@@ -324,26 +352,22 @@ void update_routing_table()
 
     if (change_table)
     {
+        usleep(100);
         send_neighbors_to_control_package();
     }
 }
 
 /**
- * Peguei do gpt pq queria ver como tinha ficado as tabelas, depois da pra apagar
- * @brief Imprime a tabela de roteamento atual e a matriz de vetores de distância
+ * Imprime a tabela de roteamento atual e a matriz de vetores de distância
  * recebidos de forma formatada e segura para threads.
  */
 void print_tables()
 {
-    // Trava o mutex do console para garantir que a impressão não seja interrompida
     pthread_mutex_lock(&console_mutex);
 
-    printf("\n\n############################################################\n");
-    printf("###               VISUALIZACAO DAS TABELAS (Roteador %d)    ###\n", router_id);
-    printf("############################################################\n\n");
+    printf("VISUALIZACAO DAS TABELAS (Roteador %d)\n", router_id);
 
-    // --- Imprimindo a Tabela de Roteamento Principal ---
-    printf("=== Tabela de Roteamento ATUAL ===\n");
+    printf("          Tabela de Roteamento\n");
     printf("+-------------+---------+---------------+\n");
     printf("|  Destino    |  Custo  | Proximo Salto |\n");
     printf("+-------------+---------+---------------+\n");
@@ -352,7 +376,6 @@ void print_tables()
     {
         printf("|      %2d     |", routing_table[i].destination);
 
-        // Imprime o custo de forma amigável (mostra 'inf' para infinito)
         if (routing_table[i].cost == -1)
         {
             printf("   inf   |");
@@ -362,7 +385,6 @@ void print_tables()
             printf("   %3d   |", routing_table[i].cost);
         }
 
-        // Imprime o próximo salto (mostra '-' para indefinido)
         if (routing_table[i].next_router == -1)
         {
             printf("       -       |");
@@ -371,21 +393,12 @@ void print_tables()
         {
             printf("      %2d       |", routing_table[i].next_router);
         }
-
-        // Adiciona um comentário para a rota até si mesmo
-        if (routing_table[i].destination == router_id)
-        {
-            printf(" <- (Este roteador)");
-        }
         printf("\n");
     }
     printf("+-------------+---------+---------------+\n\n\n");
 
-    // --- Imprimindo a Matriz de Vetores Recebidos ---
-    printf("=== Matriz de Vetores de Distancia Recebidos (last_vectors) ===\n");
-    printf("         (Visao de Custo para cada Destino Dst)\n");
+    printf("Matriz de Vetores de Distancia Recebidos (last_vectors)\n");
 
-    // Cabeçalho da matriz (Destinos)
     printf("De \\ Dst |");
     for (int j = 0; j < QTY_ROUTERS; j++)
     {
@@ -398,16 +411,13 @@ void print_tables()
     }
     printf("\n");
 
-    // Corpo da matriz (um roteador por linha)
     for (int i = 0; i < QTY_ROUTERS; i++)
     {
-        // Só imprime a linha se for um vizinho ou o próprio roteador
         if (neighbors[i].cost != -1)
         {
-            printf(" Rota %2d |", neighbors[i].id); // Cabeçalho da linha (Quem enviou o vetor)
+            printf(" Rota %2d |", neighbors[i].id);
             for (int j = 0; j < QTY_ROUTERS; j++)
             {
-                // Imprime o custo que o roteador 'i+1' anunciou para o destino 'j+1'
                 int cost = last_vectors[i][j];
                 if (cost == -1)
                 {
@@ -418,15 +428,10 @@ void print_tables()
                     printf("  %3d |", cost);
                 }
             }
-            if (neighbors[i].id == router_id)
-            {
-                printf(" <- (Meu proprio vetor)");
-            }
             printf("\n");
         }
     }
     printf("------------------------------------------------------------------------\n\n");
 
-    // Libera o mutex do console
     pthread_mutex_unlock(&console_mutex);
 }
