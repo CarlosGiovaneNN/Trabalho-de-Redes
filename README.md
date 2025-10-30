@@ -33,6 +33,7 @@ Na versão final, os nós executarão o **algoritmo Bellman-Ford distribuído** 
 - **sender:** pega os pacotes prontos da fila de sáida (outbound) e envia para os vizinhos.  
 - **handler:** processa mensagens (controle via Bellman-Ford ou dados).  
 - **shell:** interface com o usuário (menu de operações).  
+- **router_controller:** entrega os vetores distancias pros seus vizinhos.
 
 ### Estruturas de dados
 - **Mensagens de controle e dados:** tipo, origem, destino, payload.  
@@ -86,7 +87,7 @@ Exemplo:
     ````
 
 3.  **Inicialize as configurações:**
-   - Dentro do arquivo common.h defina a quantidade de roteadores na variável QTY_ROUTERS
+   - Dentro do arquivo router.h defina a quantidade de roteadores na variável QTY_ROUTERS
    - Insira a topologia da rede no arquivo enlaces.config e as configurações do roteador no roteador.config
    OBS: Certifique-se de os arquvios estarem no formato exemplificado acima e que os IDs dos roteadores estejam no intervalo [1, QTY_ROUTERS]
 
@@ -94,7 +95,7 @@ Exemplo:
     Lembre-se que o programa só vai funcionar em um ambiente linux
 
     ```bash
-    gcc *.c services/*.c -o router
+    gcc *.c services/*.c socket/*.c helper/*.c -o router
     ```
 
 5.  **Execute o programa:**

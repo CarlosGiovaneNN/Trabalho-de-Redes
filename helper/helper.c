@@ -1,4 +1,4 @@
-#include "services/common.h"
+#include "../router.h"
 
 // funcao generica de adicionar mensagem a uma fila
 void add_to_queue(Queue *queue, Package new_message)
@@ -365,7 +365,7 @@ void print_tables()
 {
     pthread_mutex_lock(&console_mutex);
 
-    printf("VISUALIZACAO DAS TABELAS (Roteador %d)\n", router_id);
+    printf("\n\nVISUALIZACAO DAS TABELAS (Roteador %d)\n", router_id);
 
     printf("          Tabela de Roteamento\n");
     printf("+-------------+---------+---------------+\n");
@@ -431,7 +431,7 @@ void print_tables()
             printf("\n");
         }
     }
-    printf("------------------------------------------------------------------------\n\n");
+    printf("--------------------------------------------------------------------------------\n\n");
 
     pthread_mutex_unlock(&console_mutex);
 }

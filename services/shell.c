@@ -1,5 +1,5 @@
-#include "../helper.h"
-#include "common.h"
+#include "../helper/helper.h"
+#include "../router.h"
 
 int show_menu();
 void exit_router();
@@ -76,7 +76,7 @@ void exit_router()
     pthread_cancel(thread_receiver);
     pthread_cancel(thread_sender);
     pthread_cancel(thread_handler);
-    pthread_cancel(thread_cron);
+    pthread_cancel(thread_router_controller);
 
     printf("Encerrando...\n");
 }

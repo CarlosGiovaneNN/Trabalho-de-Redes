@@ -1,5 +1,5 @@
-#include "../helper.h"
-#include "common.h"
+#include "../helper/helper.h"
+#include "../router.h"
 
 void send_package_to_router(Package package);
 

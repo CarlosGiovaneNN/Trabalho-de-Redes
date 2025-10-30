@@ -11,11 +11,12 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "cron.h"
-#include "handler.h"
-#include "receiver.h"
-#include "sender.h"
-#include "shell.h"
+#include "services/handler.h"
+#include "services/router_controller.h"
+#include "services/shell.h"
+
+#include "socket/receiver.h"
+#include "socket/sender.h"
 
 #define QTY_ROUTERS 10
 #define BUFLEN sizeof(Package)
@@ -70,7 +71,7 @@ extern int router_id;
 extern char server[50];
 extern int port;
 extern int time_to_control_package;
-extern pthread_t thread_receiver, thread_sender, thread_handler, thread_shell, thread_cron;
+extern pthread_t thread_receiver, thread_sender, thread_handler, thread_shell, thread_router_controller;
 extern Router neighbors[QTY_ROUTERS];
 extern pthread_mutex_t console_mutex, routers_mutex;
 

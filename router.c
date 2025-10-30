@@ -1,5 +1,5 @@
-#include "helper.h"
-#include "services/common.h"
+#include "router.h"
+#include "helper/helper.h"
 
 Queue inbound;  // Fila de entrada
 Queue outbound; // Fila de saida
@@ -7,7 +7,7 @@ int router_id = -1;
 char server[50];
 int port = 0;
 int time_to_control_package = 10;
-pthread_t thread_receiver, thread_sender, thread_handler, thread_shell, thread_cron;
+pthread_t thread_receiver, thread_sender, thread_handler, thread_shell, thread_router_controller;
 Router neighbors[QTY_ROUTERS]; // Armazena os dados de todos os roteadores e os vizinhos são representados por aqueles
                                // que tem um cost > 0
 RoutingTableEntry routing_table[QTY_ROUTERS];
@@ -83,9 +83,9 @@ int main(int argc, char const *argv[])
     }
 
     usleep(1000);
-    if (pthread_create(&thread_cron, NULL, &run_cron, NULL) != 0)
+    if (pthread_create(&thread_router_controller, NULL, &run_router_controller, NULL) != 0)
     {
-        printf("Falha ao criar a thread do cron");
+        printf("Falha ao criar a thread do router_controller");
         return -1;
     }
 
@@ -115,9 +115,9 @@ int main(int argc, char const *argv[])
         return -1;
     }
 
-    if (pthread_join(thread_cron, NULL) != 0)
+    if (pthread_join(thread_router_controller, NULL) != 0)
     {
-        printf("Falha ao juntar a thread do cron");
+        printf("Falha ao juntar a thread do router_controller");
         return -1;
     }
 

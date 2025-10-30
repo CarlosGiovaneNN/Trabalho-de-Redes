@@ -1,9 +1,9 @@
-#include "../helper.h"
-#include "common.h"
+#include "../helper/helper.h"
+#include "../router.h"
 
 void calculate_timeout();
 
-void *run_cron(void *arg)
+void *run_router_controller(void *arg)
 {
     printf("Cron iniciado.\n");
 

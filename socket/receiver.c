@@ -1,5 +1,5 @@
-#include "../helper.h"
-#include "common.h"
+#include "../helper/helper.h"
+#include "../router.h"
 
 void *run_receiver(void *arg)
 {

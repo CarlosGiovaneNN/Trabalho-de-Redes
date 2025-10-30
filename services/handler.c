@@ -1,5 +1,5 @@
-#include "../helper.h"
-#include "common.h"
+#include "../helper/helper.h"
+#include "../router.h"
 
 void control_message_handler(Package package);
 void data_message_handler(Package package);
