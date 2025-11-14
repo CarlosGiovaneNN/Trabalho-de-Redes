@@ -3,7 +3,7 @@
 
 void *run_receiver(void *arg)
 {
-    printf("Receiver iniciado.\n");
+  //  printf("Receiver iniciado.\n");
 
     // configuracoes do socket
     struct sockaddr_in si_me, si_other;

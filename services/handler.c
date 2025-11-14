@@ -6,7 +6,7 @@ void data_message_handler(Package package);
 
 void *run_handler(void *arg)
 {
-    printf("Handler iniciado.\n");
+   // printf("Handler iniciado.\n");
 
     while (1)
     {

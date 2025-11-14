@@ -46,7 +46,7 @@ typedef struct
     sem_t empty;
 } Queue;
 
-typedef struct
+typedef struct 
 {
     char id;
     char ip[50];

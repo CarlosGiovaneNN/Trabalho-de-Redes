@@ -5,7 +5,7 @@ void send_package_to_router(Package package);
 
 void *run_sender(void *arg)
 {
-    printf("Sender iniciado.\n");
+    //printf("Sender iniciado.\n");
 
     while (1)
     {

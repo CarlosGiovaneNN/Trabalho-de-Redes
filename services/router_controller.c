@@ -5,7 +5,7 @@ void calculate_timeout();
 
 void *run_router_controller(void *arg)
 {
-    printf("Cron iniciado.\n");
+   // printf("Cron iniciado.\n");
 
     while (1)
     {

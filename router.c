@@ -59,7 +59,7 @@ int main(int argc, char const *argv[])
     read_configs();
     // Inicializando a tabela de roteamento e a matriz dos vetores recebidos
     initialize_routing_tables();
-    print_tables(); // Pra mostrar como ficou as tabelas de roteamento e os ultimos vetores recebidos
+   // print_tables(); // Pra mostrar como ficou as tabelas de roteamento e os ultimos vetores recebidos
 
     // cria as e inicia as threads
     if (pthread_create(&thread_receiver, NULL, &run_receiver, NULL) != 0)

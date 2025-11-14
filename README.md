@@ -36,9 +36,11 @@ Na versão final, os nós executarão o **algoritmo Bellman-Ford distribuído** 
 - **router_controller:** entrega os vetores distancias pros seus vizinhos.
 
 ### Estruturas de dados
-- **Mensagens de controle e dados:** tipo, origem, destino, payload.  
-- **Filas de entrada e saída** (uso de mutex para sincronização) e semáfotros para evitar espera ociosa.  
-- **Tabela de roteamento** baseada em vetores distância.  
+- **(Package) - Mensagens de controle e dados:** tipo, origem, destino, payload.  
+- **(Queue) Filas de entrada e saída:** (uso de mutex para sincronização) e semáfotros para evitar espera ociosa.
+- **(Router) Roteador:** Estrutura dos roteadores com seu id, ip, porta, custo de enlace, custo original e ultima conexão 
+- **(RoutingTableEntry) Tabela de roteamento:** tabela baseada em vetores distância com destino, custo e próximo roteador.  
+- **Armazenador dos vetores distância:** uma matriz simples que armazena o custo do roteador X até o Y.  
 
 ---
 

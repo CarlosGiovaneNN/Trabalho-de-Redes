@@ -10,7 +10,7 @@ void configuration();
 
 void *run_shell(void *arg)
 {
-    printf("Shell iniciado.\n\n----------------------\n");
+   // printf("Shell iniciado.\n\n----------------------\n");
 
     while (1)
     {
@@ -131,15 +131,16 @@ void send_package()
         return;
     }
 
-    printf("\nDigite o tipo do pacote: \n0 - Controle\n1 - Dados\n\n->");
-    scanf(" %9s", type);
+    strcpy(type, "1");
+    //printf("\nDigite o tipo do pacote: \n0 - Controle\n1 - Dados\n\n->");
+    //scanf(" %9s", type);
     // Por algum motivo se voce colocar algo com epaço aqui nesse scanf ele encerra o programa
 
-    if (!strcmp(type, "0") == 0 && !strcmp(type, "1") == 0)
-    {
-        printf("Tipo inválido!\n\n");
-        return;
-    }
+    // if (!strcmp(type, "0") == 0 && !strcmp(type, "1") == 0)
+    // {
+    //    printf("Tipo inválido!\n\n");
+    //     return;
+    // }
 
     printf("\nDigite o payload: ");
     printf("\n->");
